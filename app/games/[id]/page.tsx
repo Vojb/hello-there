@@ -83,6 +83,14 @@ export default function GamePage() {
   const [guessDialogOpen, setGuessDialogOpen] = useState(false);
   const [currentGuess, setCurrentGuess] = useState<Player | null>(null);
 
+  // Load saved role from localStorage on component mount
+  useEffect(() => {
+    const savedRole = localStorage.getItem(`game_${id}_role`);
+    if (savedRole === "playerOne" || savedRole === "playerTwo") {
+      setSelectedRole(savedRole);
+    }
+  }, [id]);
+
   // Load game data
   useEffect(() => {
     const gameRef = ref(database, `games/${id}`);
@@ -163,6 +171,8 @@ export default function GamePage() {
 
   const selectRole = (role: "playerOne" | "playerTwo") => {
     setSelectedRole(role);
+    // Save role to localStorage
+    localStorage.setItem(`game_${id}_role`, role);
 
     // Update the game with the selected role
     const gameRef = ref(database, `games/${id}`);
