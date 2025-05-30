@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { database } from "@/lib/firebase";
-import { ref, push, onValue } from "firebase/database";
+import { ref, push, onValue, remove } from "firebase/database";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -16,7 +16,17 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ArrowRight, Plus, Shuffle, Target } from "lucide-react";
+import { ArrowRight, Plus, Shuffle, Target, Trash2 } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface Player {
   id: string;
@@ -42,6 +52,7 @@ export default function GamesPage() {
   const [selectedPlayerTwo, setSelectedPlayerTwo] = useState("");
   const [targetMode, setTargetMode] = useState<"select" | "random">("select");
   const [isLoading, setIsLoading] = useState(true);
+  const [gameToDelete, setGameToDelete] = useState<string | null>(null);
 
   // Load games
   useEffect(() => {
@@ -167,6 +178,16 @@ export default function GamesPage() {
         return "In progress";
       default:
         return "Unknown";
+    }
+  };
+
+  const deleteGame = async (gameId: string) => {
+    try {
+      const gameRef = ref(database, `games/${gameId}`);
+      await remove(gameRef);
+      setGameToDelete(null);
+    } catch (error) {
+      console.error("Error deleting game:", error);
     }
   };
 
@@ -332,8 +353,7 @@ export default function GamesPage() {
             {games.map((game) => (
               <Card
                 key={game.id}
-                className="hover:bg-accent/50 transition-colors cursor-pointer"
-                onClick={() => router.push(`/games/${game.id}`)}
+                className="hover:bg-accent/50 transition-colors"
               >
                 <CardContent className="p-4">
                   <div className="space-y-2">
@@ -341,11 +361,27 @@ export default function GamesPage() {
                       <span className="text-sm text-muted-foreground">
                         Game ID: {game.id.substring(0, 8)}...
                       </span>
-                      <span className="text-sm text-muted-foreground">
-                        {getGamePhaseText(game.gamePhase)}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-muted-foreground">
+                          {getGamePhaseText(game.gamePhase)}
+                        </span>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setGameToDelete(game.id);
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4 text-destructive" />
+                        </Button>
+                      </div>
                     </div>
-                    <div className="flex items-center space-x-2">
+                    <div
+                      className="flex items-center space-x-2 cursor-pointer"
+                      onClick={() => router.push(`/games/${game.id}`)}
+                    >
                       <Avatar className="h-8 w-8">
                         <AvatarFallback className="text-xs">
                           {getPlayerName(game.playerOneId)
@@ -357,7 +393,10 @@ export default function GamesPage() {
                         {getPlayerName(game.playerOneId)}
                       </span>
                     </div>
-                    <div className="flex items-center space-x-2">
+                    <div
+                      className="flex items-center space-x-2 cursor-pointer"
+                      onClick={() => router.push(`/games/${game.id}`)}
+                    >
                       <Avatar className="h-8 w-8">
                         <AvatarFallback className="text-xs">
                           {getPlayerName(game.playerTwoId)
@@ -376,6 +415,30 @@ export default function GamesPage() {
           </div>
         )}
       </div>
+
+      <AlertDialog
+        open={!!gameToDelete}
+        onOpenChange={() => setGameToDelete(null)}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This action cannot be undone. This will permanently delete the
+              game and all associated data.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => gameToDelete && deleteGame(gameToDelete)}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
