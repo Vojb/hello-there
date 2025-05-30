@@ -162,33 +162,37 @@ export default function GamePage() {
     const gameRef = ref(database, `games/${id}`);
     const updates: any = { [`${role}Joined`]: true };
 
-    // Check if both players have joined and move to target selection phase
-    const bothJoined =
-      (role === "playerOne" ? true : gameData?.playerOneJoined) &&
-      (role === "playerTwo" ? true : gameData?.playerTwoJoined);
+    // Only check for phase transition if we're in setup phase
+    if (gameData?.gamePhase === "setup") {
+      // Check if both players have joined and move to target selection phase
+      const bothJoined =
+        (role === "playerOne" ? true : gameData?.playerOneJoined) &&
+        (role === "playerTwo" ? true : gameData?.playerTwoJoined);
 
-    if (bothJoined) {
-      if (gameData?.targetMode === "random") {
-        // Auto-assign random targets and move to playing phase
-        const availablePlayers = players.filter(
-          (p) => p.id !== gameData.playerOneId && p.id !== gameData.playerTwoId
-        );
-
-        if (availablePlayers.length >= 2) {
-          const shuffled = [...availablePlayers].sort(
-            () => 0.5 - Math.random()
+      if (bothJoined) {
+        if (gameData?.targetMode === "random") {
+          // Auto-assign random targets and move to playing phase
+          const availablePlayers = players.filter(
+            (p) =>
+              p.id !== gameData.playerOneId && p.id !== gameData.playerTwoId
           );
-          updates.playerOneTargetId = shuffled[0].id;
-          updates.playerTwoTargetId = shuffled[1].id;
-          updates.gamePhase = "playing";
-        } else if (availablePlayers.length === 1) {
-          updates.playerOneTargetId = availablePlayers[0].id;
-          updates.playerTwoTargetId = availablePlayers[0].id;
-          updates.gamePhase = "playing";
+
+          if (availablePlayers.length >= 2) {
+            const shuffled = [...availablePlayers].sort(
+              () => 0.5 - Math.random()
+            );
+            updates.playerOneTargetId = shuffled[0].id;
+            updates.playerTwoTargetId = shuffled[1].id;
+            updates.gamePhase = "playing";
+          } else if (availablePlayers.length === 1) {
+            updates.playerOneTargetId = availablePlayers[0].id;
+            updates.playerTwoTargetId = availablePlayers[0].id;
+            updates.gamePhase = "playing";
+          }
+        } else {
+          // Move to target selection phase
+          updates.gamePhase = "target-selection";
         }
-      } else {
-        // Move to target selection phase
-        updates.gamePhase = "target-selection";
       }
     }
 
