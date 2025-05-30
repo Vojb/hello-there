@@ -957,7 +957,7 @@ export default function GamePage() {
       </div>
 
       {/* Game Board - All Players */}
-      <div className="grid grid-cols-5 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-2 sm:gap-3 md:gap-4">
+      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-1 sm:gap-2 md:gap-3">
         {players.map((player) => {
           const isAnimating = animatingPlayer === player.id;
           const isCrossed = myBoard[player.id]?.crossed || false;
@@ -980,20 +980,24 @@ export default function GamePage() {
               }`}
               onClick={() => togglePlayerCrossed(player.id)}
             >
-              <CardContent className="p-1 sm:p-2 md:p-1 flex flex-col items-center justify-center text-center relative">
-                <div
-                  className="w-full h-24 sm:h-28 md:h-32 rounded-lg overflow-hidden relative"
-                  style={{
-                    backgroundImage: player.imageUrl
-                      ? `url(${player.imageUrl})`
-                      : "none",
-                    backgroundSize: "cover",
-                    backgroundPosition: "center",
-                  }}
-                >
-                  <div className="absolute bottom-0 left-0 right-0 bg-black/70 p-1 sm:p-2">
+              <CardContent className="p-1 flex flex-col items-center justify-center text-center relative">
+                <div className="w-full aspect-[3/4] rounded-lg overflow-hidden relative">
+                  {player.imageUrl ? (
+                    <img
+                      src={player.imageUrl}
+                      alt={player.name}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-muted flex items-center justify-center">
+                      <span className="text-2xl font-bold text-muted-foreground">
+                        {player.name.substring(0, 2).toUpperCase()}
+                      </span>
+                    </div>
+                  )}
+                  <div className="absolute bottom-0 left-0 right-0 bg-black/70 p-1">
                     <p
-                      className={`text-xs sm:text-sm md:text-base font-medium text-white transition-all duration-300 truncate w-full ${
+                      className={`text-xs font-medium text-white transition-all duration-300 truncate w-full ${
                         isCrossed ? "line-through opacity-50" : ""
                       }`}
                       title={player.nickname || player.name}
@@ -1006,7 +1010,7 @@ export default function GamePage() {
                   {isCrossed && (
                     <div className="absolute inset-0 flex items-center justify-center bg-black/50">
                       <X
-                        className="h-6 w-6 sm:h-8 sm:w-8 md:h-12 md:w-12 animate-pulse text-red-500"
+                        className="h-6 w-6 sm:h-8 sm:w-8 animate-pulse text-red-500"
                         strokeWidth={3}
                       />
                     </div>
