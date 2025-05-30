@@ -31,6 +31,7 @@ import {
 interface Player {
   id: string;
   name: string;
+  nickname?: string;
   imageUrl?: string;
 }
 
@@ -165,7 +166,7 @@ export default function GamesPage() {
 
   const getPlayerName = (playerId: string) => {
     const player = players.find((p) => p.id === playerId);
-    return player ? player.name : "Unknown Player";
+    return player ? player.nickname || player.name : "Unknown Player";
   };
 
   const getGamePhaseText = (phase: string) => {
@@ -198,7 +199,12 @@ export default function GamesPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
         <Card>
           <CardHeader className="p-4 sm:p-6">
-            <CardTitle className="text-xl sm:text-2xl">
+            <CardTitle
+              onClick={() => {
+                router.push("/squad");
+              }}
+              className="text-xl sm:text-2xl"
+            >
               Create New Game
             </CardTitle>
           </CardHeader>

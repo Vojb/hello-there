@@ -1,149 +1,165 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState, useEffect, useRef } from "react"
-import { database } from "@/lib/firebase"
-import { ref, push, onValue, remove, update } from "firebase/database"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Label } from "@/components/ui/label"
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"
-import { Trash2, Edit, Check, X, Upload, Loader2, ImageIcon } from "lucide-react"
-import { useToast } from "@/hooks/use-toast"
+import { useState, useEffect, useRef } from "react";
+import { database } from "@/lib/firebase";
+import { ref, push, onValue, remove, update } from "firebase/database";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import {
+  Trash2,
+  Edit,
+  Check,
+  X,
+  Upload,
+  Loader2,
+  ImageIcon,
+} from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
 
 interface Player {
-  id: string
-  name: string
-  imageUrl?: string
+  id: string;
+  name: string;
+  nickname?: string;
+  imageUrl?: string;
 }
 
 export default function SquadPage() {
-  const { toast } = useToast()
-  const [players, setPlayers] = useState<Player[]>([])
-  const [name, setName] = useState("")
-  const [imageUrl, setImageUrl] = useState("")
-  const [isLoading, setIsLoading] = useState(true)
-  const [editingPlayer, setEditingPlayer] = useState<Player | null>(null)
-  const [editName, setEditName] = useState("")
-  const [editImageUrl, setEditImageUrl] = useState("")
-  const [isUploading, setIsUploading] = useState(false)
-  const [isEditUploading, setIsEditUploading] = useState(false)
-  const fileInputRef = useRef<HTMLInputElement>(null)
-  const editFileInputRef = useRef<HTMLInputElement>(null)
+  const { toast } = useToast();
+  const [players, setPlayers] = useState<Player[]>([]);
+  const [name, setName] = useState("");
+  const [nickname, setNickname] = useState("");
+  const [imageUrl, setImageUrl] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [editingPlayer, setEditingPlayer] = useState<Player | null>(null);
+  const [editName, setEditName] = useState("");
+  const [editNickname, setEditNickname] = useState("");
+  const [editImageUrl, setEditImageUrl] = useState("");
+  const [isUploading, setIsUploading] = useState(false);
+  const [isEditUploading, setIsEditUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const editFileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    const playersRef = ref(database, "players")
+    const playersRef = ref(database, "players");
 
     const unsubscribe = onValue(playersRef, (snapshot) => {
-      const data = snapshot.val()
-      const playersList: Player[] = []
+      const data = snapshot.val();
+      const playersList: Player[] = [];
 
       if (data) {
         Object.entries(data).forEach(([id, value]) => {
-          const player = value as { name: string; imageUrl?: string }
+          const player = value as { name: string; imageUrl?: string };
           playersList.push({
             id,
             name: player.name,
             imageUrl: player.imageUrl,
-          })
-        })
+          });
+        });
       }
 
-      setPlayers(playersList)
-      setIsLoading(false)
-    })
+      setPlayers(playersList);
+      setIsLoading(false);
+    });
 
-    return () => unsubscribe()
-  }, [])
+    return () => unsubscribe();
+  }, []);
 
   const addPlayer = () => {
     if (name.trim()) {
-      const playersRef = ref(database, "players")
+      const playersRef = ref(database, "players");
       const newPlayer = {
         name: name.trim(),
+        nickname: nickname.trim() || null,
         imageUrl: imageUrl.trim() || null,
-      }
+      };
 
       push(playersRef, newPlayer)
         .then(() => {
-          setName("")
-          setImageUrl("")
+          setName("");
+          setNickname("");
+          setImageUrl("");
           toast({
             title: "Player added",
             description: `${name} has been added to your squad.`,
-          })
+          });
         })
         .catch((error) => {
-          console.error("Error adding player:", error)
+          console.error("Error adding player:", error);
           toast({
             title: "Error",
             description: "Failed to add player. Please try again.",
             variant: "destructive",
-          })
-        })
+          });
+        });
     }
-  }
+  };
 
   const deletePlayer = (playerId: string, playerName: string) => {
-    const playerRef = ref(database, `players/${playerId}`)
+    const playerRef = ref(database, `players/${playerId}`);
     remove(playerRef)
       .then(() => {
         toast({
           title: "Player removed",
           description: `${playerName} has been removed from your squad.`,
-        })
+        });
       })
       .catch((error) => {
-        console.error("Error removing player:", error)
+        console.error("Error removing player:", error);
         toast({
           title: "Error",
           description: "Failed to remove player. Please try again.",
           variant: "destructive",
-        })
-      })
-  }
+        });
+      });
+  };
 
   const startEdit = (player: Player) => {
-    setEditingPlayer(player)
-    setEditName(player.name)
-    setEditImageUrl(player.imageUrl || "")
-  }
+    setEditingPlayer(player);
+    setEditName(player.name);
+    setEditNickname(player.nickname || "");
+    setEditImageUrl(player.imageUrl || "");
+  };
 
   const cancelEdit = () => {
-    setEditingPlayer(null)
-    setEditName("")
-    setEditImageUrl("")
-  }
+    setEditingPlayer(null);
+    setEditName("");
+    setEditNickname("");
+    setEditImageUrl("");
+  };
 
   const saveEdit = () => {
-    if (!editingPlayer || !editName.trim()) return
+    if (!editingPlayer || !editName.trim()) return;
 
-    const playerRef = ref(database, `players/${editingPlayer.id}`)
+    const playerRef = ref(database, `players/${editingPlayer.id}`);
     update(playerRef, {
       name: editName.trim(),
+      nickname: editNickname.trim() || null,
       imageUrl: editImageUrl.trim() || null,
     })
       .then(() => {
         toast({
           title: "Player updated",
           description: `${editName} has been updated.`,
-        })
-        cancelEdit()
+        });
+        cancelEdit();
       })
       .catch((error) => {
-        console.error("Error updating player:", error)
+        console.error("Error updating player:", error);
         toast({
           title: "Error",
           description: "Failed to update player. Please try again.",
           variant: "destructive",
-        })
-      })
-  }
+        });
+      });
+  };
 
   const uploadImage = async (file: File, isEdit = false) => {
-    if (!file) return
+    if (!file) return;
 
     // Check file size (max 32MB as per ImgBB)
     if (file.size > 32 * 1024 * 1024) {
@@ -151,75 +167,81 @@ export default function SquadPage() {
         title: "File too large",
         description: "Maximum file size is 32MB.",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
 
     // Set loading state
     if (isEdit) {
-      setIsEditUploading(true)
+      setIsEditUploading(true);
     } else {
-      setIsUploading(true)
+      setIsUploading(true);
     }
 
     try {
       // Create form data
-      const formData = new FormData()
-      formData.append("image", file)
+      const formData = new FormData();
+      formData.append("image", file);
 
       // Upload to ImgBB
-      const response = await fetch(`https://api.imgbb.com/1/upload?key=7a67a9e23d265c1164f698dd805fd959`, {
-        method: "POST",
-        body: formData,
-      })
+      const response = await fetch(
+        `https://api.imgbb.com/1/upload?key=7a67a9e23d265c1164f698dd805fd959`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
 
-      const data = await response.json()
+      const data = await response.json();
 
       if (data.success) {
         // Set the image URL
         if (isEdit) {
-          setEditImageUrl(data.data.url)
+          setEditImageUrl(data.data.url);
         } else {
-          setImageUrl(data.data.url)
+          setImageUrl(data.data.url);
         }
         toast({
           title: "Image uploaded",
           description: "Your image has been uploaded successfully.",
-        })
+        });
       } else {
-        throw new Error(data.error?.message || "Upload failed")
+        throw new Error(data.error?.message || "Upload failed");
       }
     } catch (error) {
-      console.error("Error uploading image:", error)
+      console.error("Error uploading image:", error);
       toast({
         title: "Upload failed",
         description: "Failed to upload image. Please try again.",
         variant: "destructive",
-      })
+      });
     } finally {
       // Clear loading state
       if (isEdit) {
-        setIsEditUploading(false)
+        setIsEditUploading(false);
       } else {
-        setIsUploading(false)
+        setIsUploading(false);
       }
     }
-  }
+  };
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>, isEdit = false) => {
-    const file = event.target.files?.[0]
+  const handleFileChange = (
+    event: React.ChangeEvent<HTMLInputElement>,
+    isEdit = false
+  ) => {
+    const file = event.target.files?.[0];
     if (file) {
-      uploadImage(file, isEdit)
+      uploadImage(file, isEdit);
     }
-  }
+  };
 
   const triggerFileInput = (isEdit = false) => {
     if (isEdit) {
-      editFileInputRef.current?.click()
+      editFileInputRef.current?.click();
     } else {
-      fileInputRef.current?.click()
+      fileInputRef.current?.click();
     }
-  }
+  };
 
   return (
     <div className="container mx-auto p-4 md:p-8">
@@ -233,7 +255,22 @@ export default function SquadPage() {
           <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="name">Player Name</Label>
-              <Input id="name" value={name} onChange={(e) => setName(e.target.value)} placeholder="Enter player name" />
+              <Input
+                id="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Enter player name"
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="nickname">Nickname (Optional)</Label>
+              <Input
+                id="nickname"
+                value={nickname}
+                onChange={(e) => setNickname(e.target.value)}
+                placeholder="Enter nickname"
+              />
             </div>
 
             <div className="space-y-2">
@@ -242,7 +279,10 @@ export default function SquadPage() {
                 <div className="flex-shrink-0">
                   <Avatar className="h-16 w-16 border-2 border-muted">
                     {imageUrl ? (
-                      <AvatarImage src={imageUrl || "/placeholder.svg"} alt="Preview" />
+                      <AvatarImage
+                        src={imageUrl || "/placeholder.svg"}
+                        alt="Preview"
+                      />
                     ) : (
                       <AvatarFallback>
                         <ImageIcon className="h-8 w-8 text-muted-foreground" />
@@ -324,10 +364,17 @@ export default function SquadPage() {
                     <div className="flex justify-center">
                       <Avatar className="h-16 w-16 border-2 border-muted">
                         {editImageUrl ? (
-                          <AvatarImage src={editImageUrl || "/placeholder.svg"} alt="Preview" />
+                          <AvatarImage
+                            src={editImageUrl || "/placeholder.svg"}
+                            alt="Preview"
+                          />
                         ) : (
                           <AvatarFallback>
-                            {editName ? editName.substring(0, 2).toUpperCase() : <ImageIcon className="h-8 w-8" />}
+                            {editName ? (
+                              editName.substring(0, 2).toUpperCase()
+                            ) : (
+                              <ImageIcon className="h-8 w-8" />
+                            )}
                           </AvatarFallback>
                         )}
                       </Avatar>
@@ -340,6 +387,18 @@ export default function SquadPage() {
                         value={editName}
                         onChange={(e) => setEditName(e.target.value)}
                         placeholder="Player name"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor={`edit-nickname-${player.id}`}>
+                        Nickname (Optional)
+                      </Label>
+                      <Input
+                        id={`edit-nickname-${player.id}`}
+                        value={editNickname}
+                        onChange={(e) => setEditNickname(e.target.value)}
+                        placeholder="Enter nickname"
                       />
                     </div>
 
@@ -402,7 +461,12 @@ export default function SquadPage() {
                         <Check className="h-4 w-4 mr-1" />
                         Save
                       </Button>
-                      <Button onClick={cancelEdit} variant="outline" size="sm" className="flex-1">
+                      <Button
+                        onClick={cancelEdit}
+                        variant="outline"
+                        size="sm"
+                        className="flex-1"
+                      >
                         <X className="h-4 w-4 mr-1" />
                         Cancel
                       </Button>
@@ -410,38 +474,39 @@ export default function SquadPage() {
                   </div>
                 ) : (
                   // View Mode
-                  <div className="flex items-center space-x-4">
-                    <Avatar className="h-12 w-12">
-                      {player.imageUrl ? (
-                        <AvatarImage src={player.imageUrl || "/placeholder.svg"} alt={player.name} />
-                      ) : (
-                        <AvatarFallback>{player.name.substring(0, 2).toUpperCase()}</AvatarFallback>
-                      )}
-                    </Avatar>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-lg font-medium truncate">{player.name}</p>
-                      {player.imageUrl && (
-                        <p className="text-xs text-muted-foreground truncate" title={player.imageUrl}>
-                          {player.imageUrl.substring(0, 30)}...
-                        </p>
-                      )}
+                  <div
+                    className="relative h-32 rounded-lg overflow-hidden"
+                    style={{
+                      backgroundImage: player.imageUrl
+                        ? `url(${player.imageUrl})`
+                        : "none",
+                      backgroundSize: "cover",
+                      backgroundPosition: "center",
+                    }}
+                  >
+                    <div className="absolute bottom-0 left-0 right-0 bg-black/70 p-2">
+                      <p className="text-lg font-medium text-white truncate">
+                        {player.nickname || player.name}
+                      </p>
                     </div>
-                    <div className="flex space-x-1">
+                    <div className="absolute top-2 right-2 flex space-x-1">
                       <Button
                         variant="ghost"
                         size="icon"
                         onClick={() => startEdit(player)}
                         aria-label={`Edit ${player.name}`}
+                        className="bg-white/20 hover:bg-white/30 text-white"
                       >
-                        <Edit className="h-4 w-4 text-blue-500" />
+                        <Edit className="h-4 w-4" />
                       </Button>
                       <Button
                         variant="ghost"
                         size="icon"
                         onClick={() => deletePlayer(player.id, player.name)}
                         aria-label={`Delete ${player.name}`}
+                        className="bg-white/20 hover:bg-white/30 text-white"
                       >
-                        <Trash2 className="h-4 w-4 text-red-500" />
+                        <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
                   </div>
@@ -452,5 +517,5 @@ export default function SquadPage() {
         </div>
       )}
     </div>
-  )
+  );
 }

@@ -43,6 +43,7 @@ import {
 interface Player {
   id: string;
   name: string;
+  nickname?: string;
   imageUrl?: string;
 }
 
@@ -579,7 +580,9 @@ export default function GamePage() {
                       </AvatarFallback>
                     )}
                   </Avatar>
-                  <p className="text-sm font-medium">{playerOne?.name}</p>
+                  <p className="text-sm font-medium">
+                    {playerOne?.nickname || playerOne?.name}
+                  </p>
                   <p className="text-xs text-muted-foreground">Player One</p>
                 </div>
                 <div className="text-2xl font-bold">VS</div>
@@ -596,7 +599,9 @@ export default function GamePage() {
                       </AvatarFallback>
                     )}
                   </Avatar>
-                  <p className="text-sm font-medium">{playerTwo?.name}</p>
+                  <p className="text-sm font-medium">
+                    {playerTwo?.nickname || playerTwo?.name}
+                  </p>
                   <p className="text-xs text-muted-foreground">Player Two</p>
                 </div>
               </div>
@@ -614,13 +619,13 @@ export default function GamePage() {
                 onClick={() => selectRole("playerOne")}
                 className="h-20 text-lg"
               >
-                {playerOne?.name}
+                {playerOne?.nickname || playerOne?.name}
               </Button>
               <Button
                 onClick={() => selectRole("playerTwo")}
                 className="h-20 text-lg"
               >
-                {playerTwo?.name}
+                {playerTwo?.nickname || playerTwo?.name}
               </Button>
             </div>
           </CardContent>
@@ -659,15 +664,16 @@ export default function GamePage() {
           <CardContent>
             <div className="space-y-4">
               <p className="text-muted-foreground">
-                You are {myPlayer?.name}. Choose a target for {opponent?.name}{" "}
-                to find by elimination.
+                You are {myPlayer?.nickname || myPlayer?.name}. Choose a target
+                for {opponent?.nickname || opponent?.name} to find by
+                elimination.
               </p>
 
               {!hasMyTargetBeenSelected() ? (
                 <>
                   <div className="space-y-2">
                     <Label htmlFor="target">
-                      Select Target for {opponent?.name}
+                      Select Target for {opponent?.nickname || opponent?.name}
                     </Label>
                     <Select
                       value={selectedTarget}
@@ -692,7 +698,7 @@ export default function GamePage() {
                                   </AvatarFallback>
                                 )}
                               </Avatar>
-                              <span>{player.name}</span>
+                              <span>{player.nickname || player.name}</span>
                             </div>
                           </SelectItem>
                         ))}
@@ -706,7 +712,7 @@ export default function GamePage() {
                     className="w-full"
                   >
                     <Target className="mr-2 h-4 w-4" />
-                    Set Target for {opponent?.name}
+                    Set Target for {opponent?.nickname || opponent?.name}
                   </Button>
                 </>
               ) : (
@@ -716,7 +722,8 @@ export default function GamePage() {
                     Target Selected!
                   </p>
                   <p className="text-sm text-green-600 dark:text-green-400">
-                    Waiting for {opponent?.name} to choose your target...
+                    Waiting for {opponent?.nickname || opponent?.name} to choose
+                    your target...
                   </p>
                 </div>
               )}
@@ -725,7 +732,8 @@ export default function GamePage() {
                 <div className="text-center p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg">
                   <Target className="h-8 w-8 text-blue-600 mx-auto mb-2" />
                   <p className="text-blue-700 dark:text-blue-300 font-medium">
-                    {opponent?.name} has chosen your target!
+                    {opponent?.nickname || opponent?.name} has chosen your
+                    target!
                   </p>
                 </div>
               )}
@@ -802,11 +810,14 @@ export default function GamePage() {
                     />
                   ) : (
                     <AvatarFallback>
-                      {guessedPlayer?.name.substring(0, 2).toUpperCase()}
+                      {guessedPlayer?.nickname ||
+                        guessedPlayer?.name.substring(0, 2).toUpperCase()}
                     </AvatarFallback>
                   )}
                 </Avatar>
-                <p className="font-medium">{guessedPlayer?.name}</p>
+                <p className="font-medium">
+                  {guessedPlayer?.nickname || guessedPlayer?.name}
+                </p>
               </div>
 
               <div className="text-center">
@@ -819,11 +830,14 @@ export default function GamePage() {
                     />
                   ) : (
                     <AvatarFallback>
-                      {actualTarget?.name.substring(0, 2).toUpperCase()}
+                      {actualTarget?.nickname ||
+                        actualTarget?.name.substring(0, 2).toUpperCase()}
                     </AvatarFallback>
                   )}
                 </Avatar>
-                <p className="font-medium">{actualTarget?.name}</p>
+                <p className="font-medium">
+                  {actualTarget?.nickname || actualTarget?.name}
+                </p>
               </div>
             </div>
           </CardContent>
@@ -890,7 +904,8 @@ export default function GamePage() {
                       />
                     ) : (
                       <AvatarFallback className="text-sm font-bold">
-                        {opponentTarget.name.substring(0, 2).toUpperCase()}
+                        {opponentTarget.nickname ||
+                          opponentTarget.name.substring(0, 2).toUpperCase()}
                       </AvatarFallback>
                     )}
                   </Avatar>
@@ -899,7 +914,9 @@ export default function GamePage() {
                   </div>
                 </div>
                 <div className="flex-1">
-                  <h3 className="text-lg font-bold">{opponentTarget.name}</h3>
+                  <h3 className="text-lg font-bold">
+                    {opponentTarget.nickname || opponentTarget.name}
+                  </h3>
 
                   <p className="text-xs text-purple-600 dark:text-purple-400">
                     They're looking for this player
@@ -958,47 +975,43 @@ export default function GamePage() {
               }`}
               onClick={() => togglePlayerCrossed(player.id)}
             >
-              <CardContent className="p-1 sm:p-2 md:p-4 flex flex-col items-center justify-center text-center relative">
-                <Avatar
-                  className={`h-8 w-8 sm:h-10 sm:w-10 md:h-16 md:w-16 mb-1 sm:mb-2 transition-all duration-300 ${
-                    isCrossed ? "grayscale opacity-50" : ""
-                  }`}
+              <CardContent className="p-1 sm:p-2 md:p-1 flex flex-col items-center justify-center text-center relative">
+                <div
+                  className="w-full h-24 sm:h-28 md:h-32 rounded-lg overflow-hidden relative"
+                  style={{
+                    backgroundImage: player.imageUrl
+                      ? `url(${player.imageUrl})`
+                      : "none",
+                    backgroundSize: "cover",
+                    backgroundPosition: "center",
+                  }}
                 >
-                  {player.imageUrl ? (
-                    <AvatarImage
-                      src={player.imageUrl || "/placeholder.svg"}
-                      alt={player.name}
-                    />
-                  ) : (
-                    <AvatarFallback className="text-xs sm:text-sm md:text-base">
-                      {player.name.substring(0, 2).toUpperCase()}
-                    </AvatarFallback>
-                  )}
-                </Avatar>
-
-                <p
-                  className={`text-xs sm:text-sm md:text-base font-medium transition-all duration-300 truncate w-full ${
-                    isCrossed ? "line-through opacity-50" : ""
-                  }`}
-                  title={player.name}
-                >
-                  {player.name}
-                </p>
-
-                {/* Cross overlay */}
-                {isCrossed && (
-                  <div className="absolute inset-0 flex items-center justify-center">
-                    <X
-                      className="h-6 w-6 sm:h-8 sm:w-8 md:h-12 md:w-12 animate-pulse text-red-500"
-                      strokeWidth={3}
-                    />
+                  <div className="absolute bottom-0 left-0 right-0 bg-black/70 p-1 sm:p-2">
+                    <p
+                      className={`text-xs sm:text-sm md:text-base font-medium text-white transition-all duration-300 truncate w-full ${
+                        isCrossed ? "line-through opacity-50" : ""
+                      }`}
+                      title={player.nickname || player.name}
+                    >
+                      {player.nickname || player.name.split(" ")[0]}
+                    </p>
                   </div>
-                )}
 
-                {/* Animation overlay */}
-                {isAnimating && (
-                  <div className="absolute inset-0 bg-yellow-200/50 dark:bg-yellow-500/20 rounded-lg animate-pulse" />
-                )}
+                  {/* Cross overlay */}
+                  {isCrossed && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                      <X
+                        className="h-6 w-6 sm:h-8 sm:w-8 md:h-12 md:w-12 animate-pulse text-red-500"
+                        strokeWidth={3}
+                      />
+                    </div>
+                  )}
+
+                  {/* Animation overlay */}
+                  {isAnimating && (
+                    <div className="absolute inset-0 bg-yellow-200/50 dark:bg-yellow-500/20 rounded-lg animate-pulse" />
+                  )}
+                </div>
               </CardContent>
             </Card>
           );
@@ -1029,11 +1042,14 @@ export default function GamePage() {
                   />
                 ) : (
                   <AvatarFallback className="text-lg">
-                    {finalGuess?.name.substring(0, 2).toUpperCase()}
+                    {finalGuess?.nickname ||
+                      finalGuess?.name.substring(0, 2).toUpperCase()}
                   </AvatarFallback>
                 )}
               </Avatar>
-              <p className="font-semibold">{finalGuess?.name}</p>
+              <p className="font-semibold">
+                {finalGuess?.nickname || finalGuess?.name}
+              </p>
               <p className="text-sm text-muted-foreground">Your final guess</p>
             </div>
           </div>
