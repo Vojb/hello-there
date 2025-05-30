@@ -78,6 +78,9 @@ export default function GamePage() {
   const [animatingPlayer, setAnimatingPlayer] = useState<string | null>(null);
   const [showGuessDialog, setShowGuessDialog] = useState(false);
   const [finalGuess, setFinalGuess] = useState<Player | null>(null);
+  const [isGuessMode, setIsGuessMode] = useState(false);
+  const [guessDialogOpen, setGuessDialogOpen] = useState(false);
+  const [currentGuess, setCurrentGuess] = useState<Player | null>(null);
 
   // Load game data
   useEffect(() => {
@@ -271,6 +274,16 @@ export default function GamePage() {
     const myBoard = getMyBoard();
     const remainingPlayers = getRemainingPlayers();
 
+    // If in guess mode, show guess dialog
+    if (isGuessMode) {
+      const playerToGuess = players.find((p) => p.id === playerId);
+      if (playerToGuess) {
+        setCurrentGuess(playerToGuess);
+        setGuessDialogOpen(true);
+      }
+      return;
+    }
+
     // If this would leave only one player remaining, show confirmation dialog
     if (remainingPlayers.length === 2 && !myBoard[playerId]?.crossed) {
       const finalPlayer = remainingPlayers.find((p) => p.id !== playerId);
@@ -313,8 +326,8 @@ export default function GamePage() {
     }, 600);
   };
 
-  const makeGuess = () => {
-    if (!gameData || !selectedRole || !finalGuess) return;
+  const makeGuess = (player: Player) => {
+    if (!gameData || !selectedRole) return;
 
     const myTargetId =
       selectedRole === "playerOne"
@@ -323,36 +336,46 @@ export default function GamePage() {
 
     const gameRef = ref(database, `games/${id}`);
 
-    if (finalGuess.id === myTargetId) {
+    if (player.id === myTargetId) {
       // Correct guess - player wins!
       update(gameRef, {
         gamePhase: "finished",
         winner: selectedRole,
-        winnerGuess: finalGuess.id,
+        winnerGuess: player.id,
       });
 
       toast({
         title: "🎉 You Won!",
-        description: `Congratulations! ${finalGuess.name} was indeed your opponent's target!`,
+        description: `Congratulations! ${player.name} was indeed your opponent's target!`,
       });
     } else {
-      // Wrong guess - opponent wins!
-      const opponent = selectedRole === "playerOne" ? "playerTwo" : "playerOne";
+      // Wrong guess - cross out the player and switch turns
+      const myBoard = getMyBoard();
+      const boardKey = `${selectedRole}Board`;
+      const newBoard = {
+        ...myBoard,
+        [player.id]: { crossed: true },
+      };
+
+      // Switch turns
+      const nextTurn =
+        gameData.currentTurn === "playerOne" ? "playerTwo" : "playerOne";
+
       update(gameRef, {
-        gamePhase: "finished",
-        winner: opponent,
-        winnerGuess: finalGuess.id,
+        [boardKey]: newBoard,
+        currentTurn: nextTurn,
       });
 
       toast({
         title: "😞 Wrong Guess!",
-        description: `${finalGuess.name} was not your opponent's target. You lose!`,
+        description: `${player.name} was not your opponent's target. It's now your opponent's turn!`,
         variant: "destructive",
       });
     }
 
-    setShowGuessDialog(false);
-    setFinalGuess(null);
+    setGuessDialogOpen(false);
+    setCurrentGuess(null);
+    setIsGuessMode(false);
   };
 
   const nextTurn = () => {
@@ -946,11 +969,18 @@ export default function GamePage() {
               : "⏳ Waiting for opponent"}
           </p>
           <p className="text-sm text-muted-foreground">
-            Eliminated: {getCrossedCount()} players • Remaining:{" "}
-            {remainingPlayers.length} players
+            E: {getCrossedCount()} players • R: {remainingPlayers.length}{" "}
+            players
           </p>
         </div>
         <div className="flex space-x-2">
+          <Button
+            onClick={() => setIsGuessMode(!isGuessMode)}
+            variant={isGuessMode ? "destructive" : "outline"}
+            disabled={gameData.currentTurn !== selectedRole}
+          >
+            {isGuessMode ? "Cancel Guess" : "Guess Mode"}
+          </Button>
           <Button
             onClick={nextTurn}
             disabled={gameData.currentTurn !== selectedRole}
@@ -1031,47 +1061,56 @@ export default function GamePage() {
         })}
       </div>
 
-      {/* Final Guess Dialog */}
-      <AlertDialog open={showGuessDialog} onOpenChange={setShowGuessDialog}>
+      {/* Guess Dialog */}
+      <AlertDialog open={guessDialogOpen} onOpenChange={setGuessDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="flex items-center space-x-2">
               <Target className="h-5 w-5 text-orange-500" />
-              <span>Final Guess</span>
+              <span>Make a Guess</span>
             </AlertDialogTitle>
             <AlertDialogDescription>
-              You're about to eliminate another player, leaving only one
-              remaining. Are you sure <strong>{finalGuess?.name}</strong> is
-              your opponent's target?
+              Are you sure you want to guess that{" "}
+              <strong>{currentGuess?.name}</strong> is your opponent's target?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="flex justify-center my-4">
             <div className="text-center">
               <Avatar className="h-16 w-16 mx-auto mb-2">
-                {finalGuess?.imageUrl ? (
+                {currentGuess?.imageUrl ? (
                   <AvatarImage
-                    src={finalGuess.imageUrl || "/placeholder.svg"}
-                    alt={finalGuess.name}
+                    src={currentGuess.imageUrl || "/placeholder.svg"}
+                    alt={currentGuess.name}
                   />
                 ) : (
                   <AvatarFallback className="text-lg">
-                    {finalGuess?.nickname ||
-                      finalGuess?.name.substring(0, 2).toUpperCase()}
+                    {currentGuess?.nickname ||
+                      currentGuess?.name.substring(0, 2).toUpperCase()}
                   </AvatarFallback>
                 )}
               </Avatar>
               <p className="font-semibold">
-                {finalGuess?.nickname || finalGuess?.name}
+                {currentGuess?.nickname || currentGuess?.name}
               </p>
-              <p className="text-sm text-muted-foreground">Your final guess</p>
+              <p className="text-sm text-muted-foreground">Your guess</p>
             </div>
           </div>
           <AlertDialogFooter>
-            <AlertDialogCancel onClick={() => setFinalGuess(null)}>
+            <AlertDialogCancel
+              onClick={() => {
+                setGuessDialogOpen(false);
+                setCurrentGuess(null);
+                setIsGuessMode(false);
+              }}
+            >
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
-              onClick={makeGuess}
+              onClick={() => {
+                if (currentGuess) {
+                  makeGuess(currentGuess);
+                }
+              }}
               className="bg-green-600 hover:bg-green-700"
             >
               Yes, this is my guess!
