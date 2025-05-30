@@ -69,6 +69,7 @@ export default function GamePage() {
   const { toast } = useToast();
   const [gameData, setGameData] = useState<GameData | null>(null);
   const [players, setPlayers] = useState<Player[]>([]);
+  const [shuffledPlayers, setShuffledPlayers] = useState<Player[]>([]);
   const [selectedRole, setSelectedRole] = useState<
     "playerOne" | "playerTwo" | null
   >(null);
@@ -130,6 +131,8 @@ export default function GamePage() {
       }
 
       setPlayers(playersList);
+      // Shuffle players when they are loaded
+      setShuffledPlayers([...playersList].sort(() => Math.random() - 0.5));
     });
 
     return () => unsubscribe();
@@ -992,7 +995,7 @@ export default function GamePage() {
 
       {/* Game Board - All Players */}
       <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-1 sm:gap-2 md:gap-3">
-        {players.map((player) => {
+        {shuffledPlayers.map((player) => {
           const isAnimating = animatingPlayer === player.id;
           const isCrossed = myBoard[player.id]?.crossed || false;
           const isGamePlayer =
