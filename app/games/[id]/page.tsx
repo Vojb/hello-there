@@ -112,11 +112,16 @@ export default function GamePage() {
 
       if (data) {
         Object.entries(data).forEach(([id, value]) => {
-          const player = value as { name: string; imageUrl?: string };
+          const player = value as {
+            name: string;
+            imageUrl?: string;
+            nickname?: string;
+          };
           playersList.push({
             id,
             name: player.name,
             imageUrl: player.imageUrl,
+            nickname: player.nickname,
           });
         });
       }
