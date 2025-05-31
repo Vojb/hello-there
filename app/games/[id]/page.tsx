@@ -83,6 +83,7 @@ export default function GamePage() {
   const [isGuessMode, setIsGuessMode] = useState(false);
   const [guessDialogOpen, setGuessDialogOpen] = useState(false);
   const [currentGuess, setCurrentGuess] = useState<Player | null>(null);
+  const [crossedThisTurn, setCrossedThisTurn] = useState<string[]>([]);
 
   // Load saved role from localStorage on component mount
   useEffect(() => {
@@ -169,6 +170,13 @@ export default function GamePage() {
       });
     }
   }, [gameData, players, id]);
+
+  // Reset crossedThisTurn when turn changes
+  useEffect(() => {
+    if (gameData?.currentTurn === selectedRole) {
+      setCrossedThisTurn([]);
+    }
+  }, [gameData?.currentTurn, selectedRole]);
 
   const selectRole = (role: "playerOne" | "playerTwo") => {
     setSelectedRole(role);
@@ -291,6 +299,16 @@ export default function GamePage() {
 
     // If in guess mode, show guess dialog
     if (isGuessMode) {
+      if (crossedThisTurn.length > 0) {
+        toast({
+          title: "Cannot cross and guess",
+          description:
+            "You cannot cross a player and make a guess in the same turn. End your turn first.",
+          variant: "destructive",
+        });
+        return;
+      }
+
       const playerToGuess = players.find((p) => p.id === playerId);
       if (playerToGuess) {
         setCurrentGuess(playerToGuess);
@@ -299,8 +317,18 @@ export default function GamePage() {
       return;
     }
 
-    // If this would leave only one player remaining, show confirmation dialog
+    // If this would leave only one player remaining, check if we've already crossed someone this turn
     if (remainingPlayers.length === 2 && !myBoard[playerId]?.crossed) {
+      if (crossedThisTurn.length > 0) {
+        toast({
+          title: "Cannot cross and guess",
+          description:
+            "You cannot cross a player and make a guess in the same turn. End your turn first.",
+          variant: "destructive",
+        });
+        return;
+      }
+
       const finalPlayer = remainingPlayers.find((p) => p.id !== playerId);
       if (finalPlayer) {
         setFinalGuess(finalPlayer);
@@ -311,6 +339,8 @@ export default function GamePage() {
 
     // Normal elimination
     eliminatePlayer(playerId);
+    // Add to crossedThisTurn
+    setCrossedThisTurn((prev) => [...prev, playerId]);
   };
 
   const eliminatePlayer = (playerId: string) => {
@@ -472,26 +502,13 @@ export default function GamePage() {
     const gameRef = ref(database, `games/${id}`);
     const otherRole = selectedRole === "playerOne" ? "playerTwo" : "playerOne";
 
-    // Check if the current player has won
-    const myBoard = getMyBoard();
-    const myTarget = getMyTarget();
-    const hasWon = myTarget && myBoard[myTarget.id]?.crossed;
-
-    if (hasWon) {
-      // Update game to finished state
-      await update(gameRef, {
-        gamePhase: "finished",
-        winner: selectedRole,
-        winnerGuess: myTarget.id,
-      });
-      return;
-    }
-
     // Regular turn update
     await update(gameRef, {
       currentTurn: otherRole,
       turns: (gameData.turns || 0) + 1,
     });
+    // Reset crossedThisTurn
+    setCrossedThisTurn([]);
   };
 
   const copyGameId = () => {
@@ -1242,7 +1259,7 @@ export default function GamePage() {
             </AlertDialogTitle>
             <AlertDialogDescription>
               Are you sure you want to guess that{" "}
-              <strong>{currentGuess?.name}</strong> is your opponent's target?
+              <strong>{currentGuess?.name}</strong> is your target?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="flex justify-center my-4">
@@ -1300,7 +1317,7 @@ export default function GamePage() {
             </AlertDialogTitle>
             <AlertDialogDescription>
               Only one player remains! Do you want to guess that{" "}
-              <strong>{finalGuess?.name}</strong> is your opponent's target?
+              <strong>{finalGuess?.name}</strong> is your target?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <div className="flex justify-center my-4">

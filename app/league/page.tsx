@@ -118,13 +118,18 @@ export default function LeagueTable() {
                 <TableHead className="text-right">Games</TableHead>
                 <TableHead className="text-right">Wins</TableHead>
                 <TableHead className="text-right">Losses</TableHead>
-                <TableHead className="text-right">Points</TableHead>
                 <TableHead className="text-right">Best Turns</TableHead>
+                <TableHead className="text-right font-bold text-primary">
+                  Points
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {playerStats.map((player, index) => (
-                <TableRow key={player.id}>
+                <TableRow
+                  key={player.id}
+                  className={index % 2 === 0 ? "bg-muted/50" : ""}
+                >
                   <TableCell>{index + 1}</TableCell>
                   <TableCell className="font-medium">
                     {player.nickname || player.name}
@@ -134,9 +139,11 @@ export default function LeagueTable() {
                   </TableCell>
                   <TableCell className="text-right">{player.wins}</TableCell>
                   <TableCell className="text-right">{player.losses}</TableCell>
-                  <TableCell className="text-right">{player.points}</TableCell>
                   <TableCell className="text-right">
                     {player.bestTurns === null ? "-" : player.bestTurns}
+                  </TableCell>
+                  <TableCell className="text-right font-bold text-primary">
+                    {player.points}
                   </TableCell>
                 </TableRow>
               ))}
