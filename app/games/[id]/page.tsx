@@ -27,6 +27,7 @@ import {
   Shuffle,
   Trophy,
   AlertTriangle,
+  ZoomIn,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -39,6 +40,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 
 interface Player {
   id: string;
@@ -84,6 +86,7 @@ export default function GamePage() {
   const [guessDialogOpen, setGuessDialogOpen] = useState(false);
   const [currentGuess, setCurrentGuess] = useState<Player | null>(null);
   const [crossedThisTurn, setCrossedThisTurn] = useState<string[]>([]);
+  const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
 
   // Load saved role from localStorage on component mount
   useEffect(() => {
@@ -1116,77 +1119,86 @@ export default function GamePage() {
         </Card>
       )}
 
-      <div className="flex flex-col lg:flex-row gap-4 mb-6">
-        {/* Opponent's Target - Right side */}
-        {opponentTarget && (
-          <Card className="w-full lg:w-80 border-2 border-purple-300 bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950/20 dark:to-purple-900/20">
-            <CardContent className="p-4">
-              <div className="flex items-center space-x-3 row">
-                <div className="relative">
-                  <Avatar className="h-12 w-12 border-4 border-purple-400">
-                    {opponentTarget.imageUrl ? (
-                      <AvatarImage
-                        src={opponentTarget.imageUrl || "/placeholder.svg"}
-                        alt={opponentTarget.name}
-                      />
-                    ) : (
-                      <AvatarFallback className="text-sm font-bold">
-                        {opponentTarget.nickname ||
-                          opponentTarget.name.substring(0, 2).toUpperCase()}
-                      </AvatarFallback>
-                    )}
-                  </Avatar>
-                  <div className="absolute -top-1 -right-1 bg-purple-500 text-white rounded-full p-1">
-                    <Crown className="h-3 w-3" />
+      {/* Game Status */}
+      <div className="flex flex-row justify-between mb-2 items-bewteen">
+        <p className="text-muted-foreground">
+          {gameData.currentTurn === selectedRole
+            ? "🟢 Your turn"
+            : "⏳ Waiting for opponent"}
+        </p>
+
+        <p className="text-sm text-muted-foreground">
+          {getCrossedCount()} : {remainingPlayers.length}
+        </p>
+      </div>
+
+      {opponentTarget && (
+        <div className="mb-6 flex justify-center">
+          <Card className="w-[calc(100%/3-0.5rem)] sm:w-[calc(100%/4-0.5rem)] md:w-[calc(100%/5-0.5rem)] lg:w-[calc(100%/6-0.5rem)] border-2 border-purple-300 bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950/20 dark:to-purple-900/20">
+            <CardContent className="p-1">
+              <div className="relative aspect-[3/4] rounded-lg overflow-hidden group">
+                {/* Zoom icon in top-left corner */}
+                <div
+                  className="absolute top-2 left-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedPlayer(opponentTarget);
+                  }}
+                >
+                  <div className="bg-black/50 hover:bg-black/70 rounded-full p-1.5 cursor-zoom-in transition-colors duration-200">
+                    <ZoomIn className="h-4 w-4 text-white" />
                   </div>
                 </div>
-                <div className="flex-1">
-                  <h3 className="text-lg font-bold">
+
+                {opponentTarget.imageUrl ? (
+                  <img
+                    src={opponentTarget.imageUrl}
+                    alt={opponentTarget.name}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <div className="w-full h-full bg-muted flex items-center justify-center">
+                    <span className="text-2xl font-bold text-muted-foreground">
+                      {opponentTarget.name.substring(0, 2).toUpperCase()}
+                    </span>
+                  </div>
+                )}
+                <div className="absolute bottom-0 left-0 right-0 bg-black/70 p-1">
+                  <p className="text-xs font-medium text-white truncate">
                     {opponentTarget.nickname || opponentTarget.name}
-                  </h3>
-                  <p className="text-xs text-purple-600 dark:text-purple-400">
-                    {opponent?.nickname || opponent?.name} is looking for this
-                    player
                   </p>
+                  <p className="text-[10px] text-purple-300 truncate">
+                    {opponent?.nickname || opponent?.name}'s target
+                  </p>
+                </div>
+                <div className="absolute top-2 right-2 bg-purple-500 text-white rounded-full p-1">
+                  <Crown className="h-3 w-3" />
                 </div>
               </div>
             </CardContent>
           </Card>
-        )}
+        </div>
+      )}
+
+      <div className="mb-6 flex justify-between items-between">
+        <Button
+          onClick={() => setIsGuessMode(!isGuessMode)}
+          variant={isGuessMode ? "destructive" : "outline"}
+          disabled={
+            gameData.currentTurn !== selectedRole || crossedThisTurn.length > 0
+          }
+        >
+          {isGuessMode ? "Cancel Guess" : "Guess Mode"}
+        </Button>
+        <Button
+          onClick={nextTurn}
+          disabled={gameData.currentTurn !== selectedRole}
+        >
+          End Turn
+        </Button>
       </div>
 
-      {/* Game Status */}
-      <div className="mb-6 flex justify-between items-center">
-        <div>
-          <p className="text-muted-foreground">
-            {gameData.currentTurn === selectedRole
-              ? "🟢 Your turn"
-              : "⏳ Waiting for opponent"}
-          </p>
-          <p className="text-sm text-muted-foreground">
-            E: {getCrossedCount()} players • R: {remainingPlayers.length}{" "}
-            players
-          </p>
-        </div>
-        <div className="flex space-x-2">
-          <Button
-            onClick={() => setIsGuessMode(!isGuessMode)}
-            variant={isGuessMode ? "destructive" : "outline"}
-            disabled={
-              gameData.currentTurn !== selectedRole ||
-              crossedThisTurn.length > 0
-            }
-          >
-            {isGuessMode ? "Cancel Guess" : "Guess Mode"}
-          </Button>
-          <Button
-            onClick={nextTurn}
-            disabled={gameData.currentTurn !== selectedRole}
-          >
-            End Turn
-          </Button>
-        </div>
-      </div>
+      {/* Opponent's Target */}
 
       {/* Game Board - All Players */}
       <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-1 sm:gap-2 md:gap-3">
@@ -1213,7 +1225,20 @@ export default function GamePage() {
               onClick={() => togglePlayerCrossed(player.id)}
             >
               <CardContent className="p-1 flex flex-col items-center justify-center text-center relative">
-                <div className="w-full aspect-[3/4] rounded-lg overflow-hidden relative">
+                <div className="w-full aspect-[3/4] rounded-lg overflow-hidden relative group">
+                  {/* Zoom icon in top-left corner */}
+                  <div
+                    className="absolute top-2 left-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedPlayer(player);
+                    }}
+                  >
+                    <div className="bg-black/50 hover:bg-black/70 rounded-full p-1.5 cursor-zoom-in transition-colors duration-200">
+                      <ZoomIn className="h-4 w-4 text-white" />
+                    </div>
+                  </div>
+
                   {player.imageUrl ? (
                     <img
                       src={player.imageUrl}
@@ -1258,6 +1283,37 @@ export default function GamePage() {
           );
         })}
       </div>
+
+      {/* Fullscreen Player Modal */}
+      <Dialog
+        open={!!selectedPlayer}
+        onOpenChange={() => setSelectedPlayer(null)}
+      >
+        <DialogContent className="max-w-4xl p-0 overflow-hidden">
+          {selectedPlayer && (
+            <div className="relative w-full max-h-[90vh] flex items-center justify-center">
+              {selectedPlayer.imageUrl ? (
+                <img
+                  src={selectedPlayer.imageUrl}
+                  alt={selectedPlayer.name}
+                  className="w-full h-full object-contain"
+                />
+              ) : (
+                <div className="w-full h-full min-h-[50vh] bg-muted flex items-center justify-center">
+                  <span className="text-6xl font-bold text-muted-foreground">
+                    {selectedPlayer.name.substring(0, 2).toUpperCase()}
+                  </span>
+                </div>
+              )}
+              <div className="absolute bottom-0 left-0 right-0 bg-black/70 p-4">
+                <p className="text-2xl font-medium text-white">
+                  {selectedPlayer.nickname || selectedPlayer.name}
+                </p>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Guess Dialog */}
       <AlertDialog open={guessDialogOpen} onOpenChange={setGuessDialogOpen}>
