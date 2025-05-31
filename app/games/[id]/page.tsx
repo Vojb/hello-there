@@ -895,7 +895,7 @@ export default function GamePage() {
   return (
     <div className="container mx-auto p-4 md:p-8">
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold">Vem där?</h1>
+        <h1 className="text-2xl font-bold">Guess who?</h1>
         <div className="flex space-x-2">
           <Button variant="outline" onClick={copyGameId}>
             {copied ? (
