@@ -1434,6 +1434,9 @@ video {
 .border-t {
   border-top-width: 1px;
 }
+.border-b-2 {
+  border-bottom-width: 2px;
+}
 .border-dashed {
   border-style: dashed;
 }

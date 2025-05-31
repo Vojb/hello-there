@@ -668,6 +668,70 @@ export default function GamePage() {
 
   // Game Setup Phase - Select Role
   if (gameData.gamePhase === "setup" || !selectedRole) {
+    // If player has selected a role but the other player hasn't joined yet
+    if (
+      selectedRole &&
+      !gameData[
+        `${selectedRole === "playerOne" ? "playerTwo" : "playerOne"}Joined`
+      ]
+    ) {
+      return (
+        <div className="container mx-auto p-4 md:p-8">
+          <div className="flex justify-between items-center mb-6">
+            <h1 className="text-3xl font-bold">Waiting for Opponent</h1>
+            <div className="flex space-x-2">
+              <Button variant="outline" onClick={copyGameId}>
+                {copied ? (
+                  <Check className="h-4 w-4 mr-2" />
+                ) : (
+                  <Copy className="h-4 w-4 mr-2" />
+                )}
+                {id.substring(0, 8)}...
+              </Button>
+              <Link href="/games">
+                <Button variant="outline">
+                  <Home className="h-4 w-4" />
+                </Button>
+              </Link>
+            </div>
+          </div>
+
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle>
+                Waiting for {opponent?.nickname || opponent?.name}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center p-8">
+                <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-primary mx-auto mb-4"></div>
+                <p className="text-lg mb-2">
+                  Share the game ID with your friend to join:
+                </p>
+                <div className="flex items-center justify-center space-x-2 mb-4">
+                  <code className="bg-muted px-4 py-2 rounded-md">{id}</code>
+                  <Button variant="outline" size="icon" onClick={copyGameId}>
+                    {copied ? (
+                      <Check className="h-4 w-4" />
+                    ) : (
+                      <Copy className="h-4 w-4" />
+                    )}
+                  </Button>
+                </div>
+                <p className="text-muted-foreground">
+                  {selectedRole === "playerOne"
+                    ? `${myPlayer?.nickname || myPlayer?.name} 
+                    `
+                    : `${opponent?.nickname || opponent?.name}
+                      `}
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      );
+    }
+
     return (
       <div className="container mx-auto p-4 md:p-8">
         <div className="flex justify-between items-center mb-6">
