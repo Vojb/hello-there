@@ -9,7 +9,7 @@ import Script from "next/script";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Squad Game App",
+  title: "Guess Who",
   description: "Manage your squad and play games",
   generator: "v0.dev",
   manifest: "/manifest.json",
