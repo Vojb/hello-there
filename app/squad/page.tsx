@@ -244,278 +244,283 @@ export default function SquadPage() {
   };
 
   return (
-    <div className="container mx-auto p-4 md:p-8">
-      <h1 className="text-3xl font-bold mb-6">Manage Squad</h1>
+    <div className="min-h-screen bg-background relative overflow-hidden">
+      <div className="container mx-auto p-4 md:p-8">
+        <h1 className="text-3xl font-bold mb-6">Manage Squad</h1>
 
-      <Card className="mb-8">
-        <CardHeader>
-          <CardTitle>Add New Player</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Player Name</Label>
-              <Input
-                id="name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Enter player name"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="nickname">Nickname (Optional)</Label>
-              <Input
-                id="nickname"
-                value={nickname}
-                onChange={(e) => setNickname(e.target.value)}
-                placeholder="Enter nickname"
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label>Profile Image</Label>
-              <div className="flex items-center space-x-4">
-                <div className="flex-shrink-0">
-                  <Avatar className="h-16 w-16 border-2 border-muted">
-                    {imageUrl ? (
-                      <AvatarImage
-                        src={imageUrl || "/placeholder.svg"}
-                        alt="Preview"
-                      />
-                    ) : (
-                      <AvatarFallback>
-                        <ImageIcon className="h-8 w-8 text-muted-foreground" />
-                      </AvatarFallback>
-                    )}
-                  </Avatar>
-                </div>
-                <div className="flex-1 space-y-2">
-                  <div className="flex space-x-2">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={() => triggerFileInput(false)}
-                      disabled={isUploading}
-                      className="flex-1"
-                    >
-                      {isUploading ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Uploading...
-                        </>
-                      ) : (
-                        <>
-                          <Upload className="mr-2 h-4 w-4" />
-                          Upload Image
-                        </>
-                      )}
-                    </Button>
-                    {imageUrl && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        onClick={() => setImageUrl("")}
-                        className="text-red-500"
-                        size="icon"
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    )}
-                  </div>
-                  <Input
-                    id="imageUrl"
-                    value={imageUrl}
-                    onChange={(e) => setImageUrl(e.target.value)}
-                    placeholder="Or paste image URL here"
-                  />
-                  <input
-                    type="file"
-                    ref={fileInputRef}
-                    onChange={(e) => handleFileChange(e)}
-                    accept="image/*"
-                    className="hidden"
-                  />
-                </div>
+        <Card className="mb-8">
+          <CardHeader>
+            <CardTitle>Add New Player</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">Player Name</Label>
+                <Input
+                  id="name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Enter player name"
+                />
               </div>
-            </div>
 
-            <Button onClick={addPlayer} disabled={!name.trim() || isUploading}>
-              Add Player
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
+              <div className="space-y-2">
+                <Label htmlFor="nickname">Nickname (Optional)</Label>
+                <Input
+                  id="nickname"
+                  value={nickname}
+                  onChange={(e) => setNickname(e.target.value)}
+                  placeholder="Enter nickname"
+                />
+              </div>
 
-      <h2 className="text-2xl font-semibold mb-4">Squad Players</h2>
-
-      {isLoading ? (
-        <p>Loading players...</p>
-      ) : players.length === 0 ? (
-        <p>No players in the squad yet. Add some players above.</p>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {players.map((player) => (
-            <Card key={player.id} className="overflow-hidden">
-              <CardContent className="p-4">
-                {editingPlayer?.id === player.id ? (
-                  // Edit Mode
-                  <div className="space-y-4">
-                    <div className="flex justify-center">
-                      <Avatar className="h-16 w-16 border-2 border-muted">
-                        {editImageUrl ? (
-                          <AvatarImage
-                            src={editImageUrl || "/placeholder.svg"}
-                            alt="Preview"
-                          />
-                        ) : (
-                          <AvatarFallback>
-                            {editName ? (
-                              editName.substring(0, 2).toUpperCase()
-                            ) : (
-                              <ImageIcon className="h-8 w-8" />
-                            )}
-                          </AvatarFallback>
-                        )}
-                      </Avatar>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor={`edit-name-${player.id}`}>Name</Label>
-                      <Input
-                        id={`edit-name-${player.id}`}
-                        value={editName}
-                        onChange={(e) => setEditName(e.target.value)}
-                        placeholder="Player name"
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor={`edit-nickname-${player.id}`}>
-                        Nickname (Optional)
-                      </Label>
-                      <Input
-                        id={`edit-nickname-${player.id}`}
-                        value={editNickname}
-                        onChange={(e) => setEditNickname(e.target.value)}
-                        placeholder="Enter nickname"
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label>Profile Image</Label>
-                      <div className="flex space-x-2">
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={() => triggerFileInput(true)}
-                          disabled={isEditUploading}
-                          className="flex-1"
-                        >
-                          {isEditUploading ? (
-                            <>
-                              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                              Uploading...
-                            </>
-                          ) : (
-                            <>
-                              <Upload className="mr-2 h-4 w-4" />
-                              Upload Image
-                            </>
-                          )}
-                        </Button>
-                        {editImageUrl && (
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            onClick={() => setEditImageUrl("")}
-                            className="text-red-500"
-                            size="icon"
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
-                        )}
-                      </div>
-                      <Input
-                        id={`edit-image-${player.id}`}
-                        value={editImageUrl}
-                        onChange={(e) => setEditImageUrl(e.target.value)}
-                        placeholder="Or paste image URL here"
-                      />
-                      <input
-                        type="file"
-                        ref={editFileInputRef}
-                        onChange={(e) => handleFileChange(e, true)}
-                        accept="image/*"
-                        className="hidden"
-                      />
-                    </div>
-
+              <div className="space-y-2">
+                <Label>Profile Image</Label>
+                <div className="flex items-center space-x-4">
+                  <div className="flex-shrink-0">
+                    <Avatar className="h-16 w-16 border-2 border-muted">
+                      {imageUrl ? (
+                        <AvatarImage
+                          src={imageUrl || "/placeholder.svg"}
+                          alt="Preview"
+                        />
+                      ) : (
+                        <AvatarFallback>
+                          <ImageIcon className="h-8 w-8 text-muted-foreground" />
+                        </AvatarFallback>
+                      )}
+                    </Avatar>
+                  </div>
+                  <div className="flex-1 space-y-2">
                     <div className="flex space-x-2">
                       <Button
-                        onClick={saveEdit}
-                        disabled={!editName.trim() || isEditUploading}
-                        size="sm"
-                        className="flex-1"
-                      >
-                        <Check className="h-4 w-4 mr-1" />
-                        Save
-                      </Button>
-                      <Button
-                        onClick={cancelEdit}
+                        type="button"
                         variant="outline"
-                        size="sm"
+                        onClick={() => triggerFileInput(false)}
+                        disabled={isUploading}
                         className="flex-1"
                       >
-                        <X className="h-4 w-4 mr-1" />
-                        Cancel
+                        {isUploading ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Uploading...
+                          </>
+                        ) : (
+                          <>
+                            <Upload className="mr-2 h-4 w-4" />
+                            Upload Image
+                          </>
+                        )}
                       </Button>
+                      {imageUrl && (
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          onClick={() => setImageUrl("")}
+                          className="text-red-500"
+                          size="icon"
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      )}
                     </div>
+                    <Input
+                      id="imageUrl"
+                      value={imageUrl}
+                      onChange={(e) => setImageUrl(e.target.value)}
+                      placeholder="Or paste image URL here"
+                    />
+                    <input
+                      type="file"
+                      ref={fileInputRef}
+                      onChange={(e) => handleFileChange(e)}
+                      accept="image/*"
+                      className="hidden"
+                    />
                   </div>
-                ) : (
-                  // View Mode
-                  <div
-                    className="relative h-32 rounded-lg overflow-hidden"
-                    style={{
-                      backgroundImage: player.imageUrl
-                        ? `url(${player.imageUrl})`
-                        : "none",
-                      backgroundSize: "cover",
-                      backgroundPosition: "center",
-                    }}
-                  >
-                    <div className="absolute bottom-0 left-0 right-0 bg-black/70 p-2">
-                      <p className="text-lg font-medium text-white truncate">
-                        {player.nickname || player.name}
-                      </p>
+                </div>
+              </div>
+
+              <Button
+                onClick={addPlayer}
+                disabled={!name.trim() || isUploading}
+              >
+                Add Player
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
+        <h2 className="text-2xl font-semibold mb-4">Squad Players</h2>
+
+        {isLoading ? (
+          <p>Loading players...</p>
+        ) : players.length === 0 ? (
+          <p>No players in the squad yet. Add some players above.</p>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+            {players.map((player) => (
+              <Card key={player.id} className="overflow-hidden">
+                <CardContent className="p-4">
+                  {editingPlayer?.id === player.id ? (
+                    // Edit Mode
+                    <div className="space-y-4">
+                      <div className="flex justify-center">
+                        <Avatar className="h-16 w-16 border-2 border-muted">
+                          {editImageUrl ? (
+                            <AvatarImage
+                              src={editImageUrl || "/placeholder.svg"}
+                              alt="Preview"
+                            />
+                          ) : (
+                            <AvatarFallback>
+                              {editName ? (
+                                editName.substring(0, 2).toUpperCase()
+                              ) : (
+                                <ImageIcon className="h-8 w-8" />
+                              )}
+                            </AvatarFallback>
+                          )}
+                        </Avatar>
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor={`edit-name-${player.id}`}>Name</Label>
+                        <Input
+                          id={`edit-name-${player.id}`}
+                          value={editName}
+                          onChange={(e) => setEditName(e.target.value)}
+                          placeholder="Player name"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label htmlFor={`edit-nickname-${player.id}`}>
+                          Nickname (Optional)
+                        </Label>
+                        <Input
+                          id={`edit-nickname-${player.id}`}
+                          value={editNickname}
+                          onChange={(e) => setEditNickname(e.target.value)}
+                          placeholder="Enter nickname"
+                        />
+                      </div>
+
+                      <div className="space-y-2">
+                        <Label>Profile Image</Label>
+                        <div className="flex space-x-2">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => triggerFileInput(true)}
+                            disabled={isEditUploading}
+                            className="flex-1"
+                          >
+                            {isEditUploading ? (
+                              <>
+                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                Uploading...
+                              </>
+                            ) : (
+                              <>
+                                <Upload className="mr-2 h-4 w-4" />
+                                Upload Image
+                              </>
+                            )}
+                          </Button>
+                          {editImageUrl && (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              onClick={() => setEditImageUrl("")}
+                              className="text-red-500"
+                              size="icon"
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
+                        <Input
+                          id={`edit-image-${player.id}`}
+                          value={editImageUrl}
+                          onChange={(e) => setEditImageUrl(e.target.value)}
+                          placeholder="Or paste image URL here"
+                        />
+                        <input
+                          type="file"
+                          ref={editFileInputRef}
+                          onChange={(e) => handleFileChange(e, true)}
+                          accept="image/*"
+                          className="hidden"
+                        />
+                      </div>
+
+                      <div className="flex space-x-2">
+                        <Button
+                          onClick={saveEdit}
+                          disabled={!editName.trim() || isEditUploading}
+                          size="sm"
+                          className="flex-1"
+                        >
+                          <Check className="h-4 w-4 mr-1" />
+                          Save
+                        </Button>
+                        <Button
+                          onClick={cancelEdit}
+                          variant="outline"
+                          size="sm"
+                          className="flex-1"
+                        >
+                          <X className="h-4 w-4 mr-1" />
+                          Cancel
+                        </Button>
+                      </div>
                     </div>
-                    <div className="absolute top-2 right-2 flex space-x-1">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => startEdit(player)}
-                        aria-label={`Edit ${player.name}`}
-                        className="bg-white/20 hover:bg-white/30 text-white"
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => deletePlayer(player.id, player.name)}
-                        aria-label={`Delete ${player.name}`}
-                        className="bg-white/20 hover:bg-white/30 text-white"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                  ) : (
+                    // View Mode
+                    <div
+                      className="relative h-32 rounded-lg overflow-hidden"
+                      style={{
+                        backgroundImage: player.imageUrl
+                          ? `url(${player.imageUrl})`
+                          : "none",
+                        backgroundSize: "cover",
+                        backgroundPosition: "center",
+                      }}
+                    >
+                      <div className="absolute bottom-0 left-0 right-0 bg-black/70 p-2">
+                        <p className="text-lg font-medium text-white truncate">
+                          {player.nickname || player.name}
+                        </p>
+                      </div>
+                      <div className="absolute top-2 right-2 flex space-x-1">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => startEdit(player)}
+                          aria-label={`Edit ${player.name}`}
+                          className="bg-white/20 hover:bg-white/30 text-white"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => deletePlayer(player.id, player.name)}
+                          aria-label={`Delete ${player.name}`}
+                          className="bg-white/20 hover:bg-white/30 text-white"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
+                  )}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

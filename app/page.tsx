@@ -17,6 +17,7 @@ import { database } from "@/lib/firebase";
 import { ref, onValue } from "firebase/database";
 import { Logo } from "./components/Logo";
 import { Trophy } from "lucide-react";
+import { BackgroundGrid } from "@/components/ui/background-grid";
 
 interface Player {
   id: string;
@@ -106,22 +107,7 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-background relative overflow-hidden">
       {/* Background Grid */}
-      <div className="absolute inset-0 grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-1 opacity-50">
-        {players
-          .map((player) => ({ ...player, sort: Math.random() }))
-          .sort((a, b) => a.sort - b.sort)
-          .map(({ id, name, imageUrl }) => (
-            <div
-              key={id}
-              className="aspect-square relative overflow-hidden"
-              style={{
-                backgroundImage: imageUrl ? `url(${imageUrl})` : "none",
-                backgroundSize: "cover",
-                backgroundPosition: "center",
-              }}
-            />
-          ))}
-      </div>
+      <BackgroundGrid players={players} />
 
       {/* Content */}
       <div className="container mx-auto p-4 md:p-8 relative z-10">
