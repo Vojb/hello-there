@@ -607,71 +607,83 @@ export default function GamePage() {
           </div>
         </div>
 
-        {/* Game Info */}
-        <Card className="mb-6">
-          <CardContent className="p-4">
-            <div className="flex justify-between items-center">
-              <div className="flex items-center space-x-4">
-                <div className="text-center">
-                  <Avatar className="h-12 w-12 mx-auto mb-2">
-                    {playerOne?.imageUrl ? (
-                      <AvatarImage
-                        src={playerOne.imageUrl || "/placeholder.svg"}
-                        alt={playerOne.name}
-                      />
-                    ) : (
-                      <AvatarFallback>
-                        {playerOne?.name.substring(0, 2).toUpperCase()}
-                      </AvatarFallback>
-                    )}
-                  </Avatar>
-                  <p className="text-sm font-medium">
-                    {playerOne?.nickname || playerOne?.name}
-                  </p>
-                  <p className="text-xs text-muted-foreground">Player One</p>
-                </div>
-                <div className="text-2xl font-bold">VS</div>
-                <div className="text-center">
-                  <Avatar className="h-12 w-12 mx-auto mb-2">
-                    {playerTwo?.imageUrl ? (
-                      <AvatarImage
-                        src={playerTwo.imageUrl || "/placeholder.svg"}
-                        alt={playerTwo.name}
-                      />
-                    ) : (
-                      <AvatarFallback>
-                        {playerTwo?.name.substring(0, 2).toUpperCase()}
-                      </AvatarFallback>
-                    )}
-                  </Avatar>
-                  <p className="text-sm font-medium">
-                    {playerTwo?.nickname || playerTwo?.name}
-                  </p>
-                  <p className="text-xs text-muted-foreground">Player Two</p>
-                </div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
         <Card className="mb-8">
           <CardHeader>
-            <CardTitle>Select Your Role</CardTitle>
+            <CardTitle>Who are you?</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <Button
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div
                 onClick={() => selectRole("playerOne")}
-                className="h-20 text-lg"
+                className="group relative cursor-pointer rounded-xl border-2 border-transparent hover:border-primary transition-all duration-200 overflow-hidden"
               >
-                {playerOne?.nickname || playerOne?.name}
-              </Button>
-              <Button
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+                <div className="p-6 flex flex-col items-center text-center">
+                  <div className="relative mb-4">
+                    <Avatar className="h-24 w-24 border-4 border-primary/20 group-hover:border-primary/40 transition-colors duration-200">
+                      {playerOne?.imageUrl ? (
+                        <AvatarImage
+                          src={playerOne.imageUrl}
+                          alt={playerOne.name}
+                          className="object-cover"
+                        />
+                      ) : (
+                        <AvatarFallback className="text-2xl">
+                          {playerOne?.name.substring(0, 2).toUpperCase()}
+                        </AvatarFallback>
+                      )}
+                    </Avatar>
+                    <div className="absolute -top-2 -right-2 bg-primary text-primary-foreground rounded-full p-2">
+                      <Crown className="h-4 w-4" />
+                    </div>
+                  </div>
+                  <h3 className="text-xl font-bold mb-1">
+                    {playerOne?.nickname || playerOne?.name}
+                  </h3>
+                  <p className="text-sm text-muted-foreground">Player One</p>
+                  <div className="mt-4 w-full">
+                    <Button className="w-full" variant="outline">
+                      Selectx
+                    </Button>
+                  </div>
+                </div>
+              </div>
+
+              <div
                 onClick={() => selectRole("playerTwo")}
-                className="h-20 text-lg"
+                className="group relative cursor-pointer rounded-xl border-2 border-transparent hover:border-primary transition-all duration-200 overflow-hidden"
               >
-                {playerTwo?.nickname || playerTwo?.name}
-              </Button>
+                <div className="absolute inset-0 bg-gradient-to-br from-primary/10 to-primary/5 opacity-0 group-hover:opacity-100 transition-opacity duration-200" />
+                <div className="p-6 flex flex-col items-center text-center">
+                  <div className="relative mb-4">
+                    <Avatar className="h-24 w-24 border-4 border-primary/20 group-hover:border-primary/40 transition-colors duration-200">
+                      {playerTwo?.imageUrl ? (
+                        <AvatarImage
+                          src={playerTwo.imageUrl}
+                          alt={playerTwo.name}
+                          className="object-cover"
+                        />
+                      ) : (
+                        <AvatarFallback className="text-2xl">
+                          {playerTwo?.name.substring(0, 2).toUpperCase()}
+                        </AvatarFallback>
+                      )}
+                    </Avatar>
+                    <div className="absolute -top-2 -right-2 bg-primary text-primary-foreground rounded-full p-2">
+                      <Crown className="h-4 w-4" />
+                    </div>
+                  </div>
+                  <h3 className="text-xl font-bold mb-1">
+                    {playerTwo?.nickname || playerTwo?.name}
+                  </h3>
+                  <p className="text-sm text-muted-foreground">Player Two</p>
+                  <div className="mt-4 w-full">
+                    <Button className="w-full" variant="outline">
+                      Select Role
+                    </Button>
+                  </div>
+                </div>
+              </div>
             </div>
           </CardContent>
         </Card>
