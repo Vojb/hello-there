@@ -16,7 +16,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { ArrowRight, Plus, Shuffle, Target, Trash2 } from "lucide-react";
+import {
+  ArrowRight,
+  Plus,
+  Shuffle,
+  Target,
+  Trash2,
+  Trophy,
+} from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -27,6 +34,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import Link from "next/link";
 
 interface Player {
   id: string;
@@ -41,7 +49,7 @@ interface Game {
   playerOneId: string;
   playerTwoId: string;
   targetMode: "select" | "random";
-  gamePhase: "setup" | "target-selection" | "playing";
+  gamePhase: "setup" | "target-selection" | "playing" | "finished";
 }
 
 export default function GamesPage() {
@@ -70,7 +78,7 @@ export default function GamesPage() {
             playerOneId: string;
             playerTwoId: string;
             targetMode?: "select" | "random";
-            gamePhase?: "setup" | "target-selection" | "playing";
+            gamePhase?: "setup" | "target-selection" | "playing" | "finished";
           };
           gamesList.push({
             id,
@@ -177,6 +185,8 @@ export default function GamesPage() {
         return "Selecting targets";
       case "playing":
         return "In progress";
+      case "finished":
+        return "Finished";
       default:
         return "Unknown";
     }
@@ -194,7 +204,15 @@ export default function GamesPage() {
 
   return (
     <div className="container mx-auto p-2 sm:p-4 md:p-8">
-      <h1 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6">Games</h1>
+      <div className="flex justify-between items-center mb-4 sm:mb-6">
+        <h1 className="text-2xl sm:text-3xl font-bold">Games</h1>
+        <Link href="/league">
+          <Button variant="outline" className="gap-2">
+            <Trophy className="w-4 h-4" />
+            League Table
+          </Button>
+        </Link>
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
         <Card>
@@ -356,68 +374,70 @@ export default function GamesPage() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-            {games.map((game) => (
-              <Card
-                key={game.id}
-                className="hover:bg-accent/50 transition-colors"
-              >
-                <CardContent className="p-4">
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm text-muted-foreground">
-                        Game ID: {game.id.substring(0, 8)}...
-                      </span>
-                      <div className="flex items-center gap-2">
+            {games
+              .filter((game) => game.gamePhase !== "finished")
+              .map((game) => (
+                <Card
+                  key={game.id}
+                  className="hover:bg-accent/50 transition-colors"
+                >
+                  <CardContent className="p-4">
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
                         <span className="text-sm text-muted-foreground">
-                          {getGamePhaseText(game.gamePhase)}
+                          Game ID: {game.id.substring(0, 8)}...
                         </span>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="h-8 w-8"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setGameToDelete(game.id);
-                          }}
-                        >
-                          <Trash2 className="h-4 w-4 text-destructive" />
-                        </Button>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm text-muted-foreground">
+                            {getGamePhaseText(game.gamePhase)}
+                          </span>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setGameToDelete(game.id);
+                            }}
+                          >
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </div>
+                      </div>
+                      <div
+                        className="flex items-center space-x-2 cursor-pointer"
+                        onClick={() => router.push(`/games/${game.id}`)}
+                      >
+                        <Avatar className="h-8 w-8">
+                          <AvatarFallback className="text-xs">
+                            {getPlayerName(game.playerOneId)
+                              .substring(0, 2)
+                              .toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span className="truncate">
+                          {getPlayerName(game.playerOneId)}
+                        </span>
+                      </div>
+                      <div
+                        className="flex items-center space-x-2 cursor-pointer"
+                        onClick={() => router.push(`/games/${game.id}`)}
+                      >
+                        <Avatar className="h-8 w-8">
+                          <AvatarFallback className="text-xs">
+                            {getPlayerName(game.playerTwoId)
+                              .substring(0, 2)
+                              .toUpperCase()}
+                          </AvatarFallback>
+                        </Avatar>
+                        <span className="truncate">
+                          {getPlayerName(game.playerTwoId)}
+                        </span>
                       </div>
                     </div>
-                    <div
-                      className="flex items-center space-x-2 cursor-pointer"
-                      onClick={() => router.push(`/games/${game.id}`)}
-                    >
-                      <Avatar className="h-8 w-8">
-                        <AvatarFallback className="text-xs">
-                          {getPlayerName(game.playerOneId)
-                            .substring(0, 2)
-                            .toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                      <span className="truncate">
-                        {getPlayerName(game.playerOneId)}
-                      </span>
-                    </div>
-                    <div
-                      className="flex items-center space-x-2 cursor-pointer"
-                      onClick={() => router.push(`/games/${game.id}`)}
-                    >
-                      <Avatar className="h-8 w-8">
-                        <AvatarFallback className="text-xs">
-                          {getPlayerName(game.playerTwoId)
-                            .substring(0, 2)
-                            .toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                      <span className="truncate">
-                        {getPlayerName(game.playerTwoId)}
-                      </span>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
+                  </CardContent>
+                </Card>
+              ))}
           </div>
         )}
       </div>

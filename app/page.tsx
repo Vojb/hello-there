@@ -16,6 +16,7 @@ import { useEffect, useState } from "react";
 import { database } from "@/lib/firebase";
 import { ref, onValue } from "firebase/database";
 import { Logo } from "./components/Logo";
+import { Trophy } from "lucide-react";
 
 interface Player {
   id: string;
@@ -30,6 +31,7 @@ interface Game {
   playerOneId: string;
   playerTwoId: string;
   status: "waiting" | "in_progress" | "completed";
+  gamePhase?: "setup" | "target-selection" | "playing" | "finished";
 }
 
 export default function Home() {
@@ -71,8 +73,10 @@ export default function Home() {
           id,
           ...(value as Omit<Game, "id">),
         }));
-        // Sort by creation date and get the latest
-        const sortedGames = games.sort((a, b) => b.createdAt - a.createdAt);
+        // Sort by creation date and get the latest non-finished game
+        const sortedGames = games
+          .filter((game) => game.gamePhase !== "finished")
+          .sort((a, b) => b.createdAt - a.createdAt);
         setLatestGame(sortedGames[0]);
         setRecentGames(sortedGames.slice(0, 2));
       }
@@ -128,6 +132,14 @@ export default function Home() {
             Test your knowledge of your squad! Can you guess who's who based on
             their characteristics?
           </p>
+          <div className="mt-4">
+            <Link href="/league">
+              <Button variant="outline" className="gap-2">
+                <Trophy className="w-4 h-4" />
+                View League Table
+              </Button>
+            </Link>
+          </div>
         </div>
 
         {/* Game Cards */}

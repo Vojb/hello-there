@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 import { database } from "@/lib/firebase";
-import { ref, onValue, update } from "firebase/database";
+import { ref, onValue, update, get } from "firebase/database";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -62,6 +62,7 @@ interface GameData {
   currentTurn: "playerOne" | "playerTwo";
   winner?: "playerOne" | "playerTwo";
   winnerGuess?: string;
+  turns: number;
 }
 
 export default function GamePage() {
@@ -219,6 +220,7 @@ export default function GamePage() {
     if (!gameData || !selectedRole || !selectedTarget) return;
 
     const gameRef = ref(database, `games/${id}`);
+    // Set the target for the current player
     const targetKey = `${selectedRole}TargetId`;
 
     const updates: any = {
@@ -339,23 +341,96 @@ export default function GamePage() {
     }, 600);
   };
 
+  const updatePlayerStats = async (
+    winner: "playerOne" | "playerTwo",
+    turns: number
+  ) => {
+    if (!gameData) return;
+
+    const winnerId =
+      gameData[winner === "playerOne" ? "playerOneId" : "playerTwoId"];
+    const loserId =
+      gameData[winner === "playerOne" ? "playerTwoId" : "playerOneId"];
+
+    // Get player info
+    const winnerPlayer = players.find((p) => p.id === winnerId);
+    const loserPlayer = players.find((p) => p.id === loserId);
+
+    if (!winnerPlayer || !loserPlayer) return;
+
+    // Update winner stats
+    const winnerStatsRef = ref(database, `playerStats/${winnerId}`);
+    const winnerSnapshot = await get(winnerStatsRef);
+    const currentWinnerStats = winnerSnapshot.val() || {
+      name: winnerPlayer.name,
+      nickname: winnerPlayer.nickname,
+      imageUrl: winnerPlayer.imageUrl,
+      gamesPlayed: 0,
+      wins: 0,
+      losses: 0,
+      points: 0,
+      bestTurns: null,
+    };
+
+    const newWinnerStats = {
+      ...currentWinnerStats,
+      gamesPlayed: (currentWinnerStats.gamesPlayed || 0) + 1,
+      wins: (currentWinnerStats.wins || 0) + 1,
+      losses: currentWinnerStats.losses || 0,
+      points: (currentWinnerStats.points || 0) + 4, // 4 points for a win
+      bestTurns: turns,
+    };
+
+    await update(winnerStatsRef, newWinnerStats);
+
+    // Update loser stats
+    const loserStatsRef = ref(database, `playerStats/${loserId}`);
+    const loserSnapshot = await get(loserStatsRef);
+    const currentLoserStats = loserSnapshot.val() || {
+      name: loserPlayer.name,
+      nickname: loserPlayer.nickname,
+      imageUrl: loserPlayer.imageUrl,
+      gamesPlayed: 0,
+      wins: 0,
+      losses: 0,
+      points: 0,
+      bestTurns: null,
+    };
+
+    const newLoserStats = {
+      ...currentLoserStats,
+      gamesPlayed: (currentLoserStats.gamesPlayed || 0) + 1,
+      wins: currentLoserStats.wins || 0,
+      losses: (currentLoserStats.losses || 0) + 1,
+      points: (currentLoserStats.points || 0) + 1, // 1 point for losing
+    };
+
+    await update(loserStatsRef, newLoserStats);
+  };
+
   const makeGuess = (player: Player) => {
     if (!gameData || !selectedRole) return;
 
-    const myTargetId =
-      selectedRole === "playerOne"
-        ? gameData.playerTwoTargetId
-        : gameData.playerOneTargetId;
-
     const gameRef = ref(database, `games/${id}`);
 
-    if (player.id === myTargetId) {
+    // Get the opponent's target (the one the current player can't see)
+    const opponentRole =
+      selectedRole === "playerOne" ? "playerTwo" : "playerOne";
+    const opponentTargetId = gameData[`${opponentRole}TargetId`];
+
+    // Check if the guessed player matches the opponent's target
+    const isCorrectGuess = player.id === opponentTargetId;
+
+    if (isCorrectGuess) {
       // Correct guess - player wins!
       update(gameRef, {
         gamePhase: "finished",
         winner: selectedRole,
         winnerGuess: player.id,
       });
+
+      // Update player stats
+      updatePlayerStats(selectedRole, gameData.turns || 0);
 
       toast({
         title: "🎉 You Won!",
@@ -391,25 +466,32 @@ export default function GamePage() {
     setIsGuessMode(false);
   };
 
-  const nextTurn = () => {
+  const nextTurn = async () => {
     if (!gameData || !selectedRole) return;
 
-    // Check if it's this player's turn
-    if (gameData.currentTurn !== selectedRole) {
-      toast({
-        title: "Not your turn",
-        description: "Wait for the other player to finish their turn.",
-        variant: "destructive",
+    const gameRef = ref(database, `games/${id}`);
+    const otherRole = selectedRole === "playerOne" ? "playerTwo" : "playerOne";
+
+    // Check if the current player has won
+    const myBoard = getMyBoard();
+    const myTarget = getMyTarget();
+    const hasWon = myTarget && myBoard[myTarget.id]?.crossed;
+
+    if (hasWon) {
+      // Update game to finished state
+      await update(gameRef, {
+        gamePhase: "finished",
+        winner: selectedRole,
+        winnerGuess: myTarget.id,
       });
       return;
     }
 
-    // Switch turns
-    const nextTurn =
-      gameData.currentTurn === "playerOne" ? "playerTwo" : "playerOne";
-
-    const gameRef = ref(database, `games/${id}`);
-    update(gameRef, { currentTurn: nextTurn });
+    // Regular turn update
+    await update(gameRef, {
+      currentTurn: otherRole,
+      turns: (gameData.turns || 0) + 1,
+    });
   };
 
   const copyGameId = () => {
@@ -974,9 +1056,9 @@ export default function GamePage() {
                   <h3 className="text-lg font-bold">
                     {opponentTarget.nickname || opponentTarget.name}
                   </h3>
-
                   <p className="text-xs text-purple-600 dark:text-purple-400">
-                    They're looking for this player
+                    {opponent?.nickname || opponent?.name} is looking for this
+                    player
                   </p>
                 </div>
               </div>
@@ -1139,6 +1221,63 @@ export default function GamePage() {
               className="bg-green-600 hover:bg-green-700"
             >
               Yes, this is my guess!
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Final Guess Dialog */}
+      <AlertDialog open={showGuessDialog} onOpenChange={setShowGuessDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center space-x-2">
+              <Target className="h-5 w-5 text-orange-500" />
+              <span>Final Guess?</span>
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              Only one player remains! Do you want to guess that{" "}
+              <strong>{finalGuess?.name}</strong> is your opponent's target?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="flex justify-center my-4">
+            <div className="text-center">
+              <Avatar className="h-16 w-16 mx-auto mb-2">
+                {finalGuess?.imageUrl ? (
+                  <AvatarImage
+                    src={finalGuess.imageUrl || "/placeholder.svg"}
+                    alt={finalGuess.name}
+                  />
+                ) : (
+                  <AvatarFallback className="text-lg">
+                    {finalGuess?.nickname ||
+                      finalGuess?.name.substring(0, 2).toUpperCase()}
+                  </AvatarFallback>
+                )}
+              </Avatar>
+              <p className="font-semibold">
+                {finalGuess?.nickname || finalGuess?.name}
+              </p>
+              <p className="text-sm text-muted-foreground">Your final guess</p>
+            </div>
+          </div>
+          <AlertDialogFooter>
+            <AlertDialogCancel
+              onClick={() => {
+                setShowGuessDialog(false);
+                setFinalGuess(null);
+              }}
+            >
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                if (finalGuess) {
+                  makeGuess(finalGuess);
+                }
+              }}
+              className="bg-green-600 hover:bg-green-700"
+            >
+              Yes, this is my final guess!
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
