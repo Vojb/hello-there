@@ -339,8 +339,15 @@ export default function GamePage() {
 
     // Normal elimination
     eliminatePlayer(playerId);
-    // Add to crossedThisTurn
-    setCrossedThisTurn((prev) => [...prev, playerId]);
+
+    // Update crossedThisTurn based on whether we're crossing or uncrossing
+    if (!myBoard[playerId]?.crossed) {
+      // Crossing a player
+      setCrossedThisTurn((prev) => [...prev, playerId]);
+    } else {
+      // Uncrossing a player
+      setCrossedThisTurn((prev) => prev.filter((id) => id !== playerId));
+    }
   };
 
   const eliminatePlayer = (playerId: string) => {
@@ -1165,7 +1172,10 @@ export default function GamePage() {
           <Button
             onClick={() => setIsGuessMode(!isGuessMode)}
             variant={isGuessMode ? "destructive" : "outline"}
-            disabled={gameData.currentTurn !== selectedRole}
+            disabled={
+              gameData.currentTurn !== selectedRole ||
+              crossedThisTurn.length > 0
+            }
           >
             {isGuessMode ? "Cancel Guess" : "Guess Mode"}
           </Button>
