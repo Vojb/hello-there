@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { database } from "@/lib/firebase";
 import { ref, push, onValue, remove } from "firebase/database";
+import { playersRef, gamesRef, GAMES } from "@/lib/firebase-refs";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -66,9 +67,7 @@ export default function GamesPage() {
 
   // Load games
   useEffect(() => {
-    const gamesRef = ref(database, "games");
-
-    const unsubscribe = onValue(gamesRef, (snapshot) => {
+    const unsubscribe = onValue(gamesRef(), (snapshot) => {
       const data = snapshot.val();
       const gamesList: Game[] = [];
 
@@ -104,9 +103,7 @@ export default function GamesPage() {
 
   // Load players
   useEffect(() => {
-    const playersRef = ref(database, "players");
-
-    const unsubscribe = onValue(playersRef, (snapshot) => {
+    const unsubscribe = onValue(playersRef(), (snapshot) => {
       const data = snapshot.val();
       const playersList: Player[] = [];
 
@@ -136,8 +133,6 @@ export default function GamesPage() {
       return;
     }
 
-    const gamesRef = ref(database, "games");
-
     // Create initial board state with all players
     const initialBoard: Record<string, { crossed: boolean }> = {};
     players.forEach((player) => {
@@ -158,9 +153,9 @@ export default function GamesPage() {
     };
 
     try {
-      const gameRef = await push(gamesRef, newGame);
+      const gameRef = await push(gamesRef(), newGame);
       if (gameRef.key) {
-        router.push(`/games/${gameRef.key}`);
+        router.push(`/${GAMES}/${gameRef.key}`);
       }
     } catch (error) {
       console.error("Error creating game:", error);
@@ -169,7 +164,7 @@ export default function GamesPage() {
 
   const joinGame = () => {
     if (gameId.trim()) {
-      router.push(`/games/${gameId.trim()}`);
+      router.push(`/${GAMES}/${gameId.trim()}`);
     }
   };
 
@@ -195,7 +190,7 @@ export default function GamesPage() {
 
   const deleteGame = async (gameId: string) => {
     try {
-      const gameRef = ref(database, `games/${gameId}`);
+      const gameRef = ref(database, `${GAMES}/${gameId}`);
       await remove(gameRef);
       setGameToDelete(null);
     } catch (error) {

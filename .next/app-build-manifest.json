@@ -1,35 +1,78 @@
 {
   "pages": {
+    "/_not-found/page": [
+      "static/chunks/webpack-5417328a50983c10.js",
+      "static/chunks/4bd1b696-4b0f7518a463c96c.js",
+      "static/chunks/684-d3dd91eb934e38c1.js",
+      "static/chunks/main-app-ea420be42bd2ff52.js",
+      "static/chunks/app/_not-found/page-b63df5a8d3225455.js"
+    ],
     "/layout": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/css/app/layout.css",
-      "static/chunks/app/layout.js"
+      "static/chunks/webpack-5417328a50983c10.js",
+      "static/chunks/4bd1b696-4b0f7518a463c96c.js",
+      "static/chunks/684-d3dd91eb934e38c1.js",
+      "static/chunks/main-app-ea420be42bd2ff52.js",
+      "static/css/374a06b89f981d93.css",
+      "static/chunks/778-9fd176a792a0517b.js",
+      "static/chunks/580-874226ded7dac527.js",
+      "static/chunks/app/layout-26ea627d88d3986a.js"
     ],
     "/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/page.js"
-    ],
-    "/games/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/games/page.js"
-    ],
-    "/games/[id]/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/games/[id]/page.js"
-    ],
-    "/squad/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/squad/page.js"
+      "static/chunks/webpack-5417328a50983c10.js",
+      "static/chunks/4bd1b696-4b0f7518a463c96c.js",
+      "static/chunks/684-d3dd91eb934e38c1.js",
+      "static/chunks/main-app-ea420be42bd2ff52.js",
+      "static/chunks/457b8330-fab43f92cd84faf3.js",
+      "static/chunks/778-9fd176a792a0517b.js",
+      "static/chunks/210-99c2b2e18ad1a71d.js",
+      "static/chunks/874-476808868ec6108b.js",
+      "static/chunks/app/page-ae90a0ff53c1f005.js"
     ],
     "/league/page": [
-      "static/chunks/webpack.js",
-      "static/chunks/main-app.js",
-      "static/chunks/app/league/page.js"
+      "static/chunks/webpack-5417328a50983c10.js",
+      "static/chunks/4bd1b696-4b0f7518a463c96c.js",
+      "static/chunks/684-d3dd91eb934e38c1.js",
+      "static/chunks/main-app-ea420be42bd2ff52.js",
+      "static/chunks/457b8330-fab43f92cd84faf3.js",
+      "static/chunks/778-9fd176a792a0517b.js",
+      "static/chunks/210-99c2b2e18ad1a71d.js",
+      "static/chunks/874-476808868ec6108b.js",
+      "static/chunks/app/league/page-cbf0a36b10dfb7cf.js"
+    ],
+    "/games/[id]/page": [
+      "static/chunks/webpack-5417328a50983c10.js",
+      "static/chunks/4bd1b696-4b0f7518a463c96c.js",
+      "static/chunks/684-d3dd91eb934e38c1.js",
+      "static/chunks/main-app-ea420be42bd2ff52.js",
+      "static/chunks/457b8330-fab43f92cd84faf3.js",
+      "static/chunks/778-9fd176a792a0517b.js",
+      "static/chunks/210-99c2b2e18ad1a71d.js",
+      "static/chunks/874-476808868ec6108b.js",
+      "static/chunks/431-56cce995450b2405.js",
+      "static/chunks/842-139513a1bc8a4d53.js",
+      "static/chunks/app/games/[id]/page-35302c7ce6421d5b.js"
+    ],
+    "/squad/page": [
+      "static/chunks/webpack-5417328a50983c10.js",
+      "static/chunks/4bd1b696-4b0f7518a463c96c.js",
+      "static/chunks/684-d3dd91eb934e38c1.js",
+      "static/chunks/main-app-ea420be42bd2ff52.js",
+      "static/chunks/457b8330-fab43f92cd84faf3.js",
+      "static/chunks/778-9fd176a792a0517b.js",
+      "static/chunks/210-99c2b2e18ad1a71d.js",
+      "static/chunks/app/squad/page-558719b98915543d.js"
+    ],
+    "/games/page": [
+      "static/chunks/webpack-5417328a50983c10.js",
+      "static/chunks/4bd1b696-4b0f7518a463c96c.js",
+      "static/chunks/684-d3dd91eb934e38c1.js",
+      "static/chunks/main-app-ea420be42bd2ff52.js",
+      "static/chunks/457b8330-fab43f92cd84faf3.js",
+      "static/chunks/778-9fd176a792a0517b.js",
+      "static/chunks/210-99c2b2e18ad1a71d.js",
+      "static/chunks/874-476808868ec6108b.js",
+      "static/chunks/431-56cce995450b2405.js",
+      "static/chunks/app/games/page-b4ce65238eb1af6f.js"
     ]
   }
 }

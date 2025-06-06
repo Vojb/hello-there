@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { database } from "@/lib/firebase";
-import { ref, onValue } from "firebase/database";
+import { onValue } from "firebase/database";
+import { playerStatsRef } from "@/lib/firebase-refs";
 import {
   Table,
   TableBody,
@@ -32,8 +32,7 @@ export default function LeagueTable() {
   const [playerStats, setPlayerStats] = useState<PlayerStats[]>([]);
 
   useEffect(() => {
-    const statsRef = ref(database, "playerStats");
-    const unsubscribe = onValue(statsRef, (snapshot) => {
+    const unsubscribe = onValue(playerStatsRef(), (snapshot) => {
       const data = snapshot.val();
       const statsList: PlayerStats[] = [];
 

@@ -15,6 +15,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { database } from "@/lib/firebase";
 import { ref, onValue } from "firebase/database";
+import { playersRef, gamesRef } from "@/lib/firebase-refs";
 import { Logo } from "./components/Logo";
 import { Trophy } from "lucide-react";
 import { BackgroundGrid } from "@/components/ui/background-grid";
@@ -41,8 +42,7 @@ export default function Home() {
   const [recentGames, setRecentGames] = useState<Game[]>([]);
 
   useEffect(() => {
-    const playersRef = ref(database, "players");
-    const unsubscribe = onValue(playersRef, (snapshot) => {
+    const unsubscribe = onValue(playersRef(), (snapshot) => {
       const data = snapshot.val();
       const playersList: Player[] = [];
 
@@ -66,8 +66,7 @@ export default function Home() {
     });
 
     // Subscribe to games
-    const gamesRef = ref(database, "games");
-    const unsubscribeGames = onValue(gamesRef, (snapshot) => {
+    const unsubscribeGames = onValue(gamesRef(), (snapshot) => {
       const data = snapshot.val();
       if (data) {
         const games = Object.entries(data).map(([id, value]) => ({

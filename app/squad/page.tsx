@@ -5,6 +5,7 @@ import type React from "react";
 import { useState, useEffect, useRef } from "react";
 import { database } from "@/lib/firebase";
 import { ref, push, onValue, remove, update } from "firebase/database";
+import { playersRef } from "@/lib/firebase-refs";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -45,9 +46,7 @@ export default function SquadPage() {
   const editFileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    const playersRef = ref(database, "players");
-
-    const unsubscribe = onValue(playersRef, (snapshot) => {
+    const unsubscribe = onValue(playersRef(), (snapshot) => {
       const data = snapshot.val();
       const playersList: Player[] = [];
 
@@ -71,14 +70,13 @@ export default function SquadPage() {
 
   const addPlayer = () => {
     if (name.trim()) {
-      const playersRef = ref(database, "players");
       const newPlayer = {
         name: name.trim(),
         nickname: nickname.trim() || null,
         imageUrl: imageUrl.trim() || null,
       };
 
-      push(playersRef, newPlayer)
+      push(playersRef(), newPlayer)
         .then(() => {
           setName("");
           setNickname("");

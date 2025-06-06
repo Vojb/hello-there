@@ -5,6 +5,7 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { database } from "@/lib/firebase";
 import { ref, onValue, update, get } from "firebase/database";
+import { playersRef, GAMES, BASE_PATH } from "@/lib/firebase-refs";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -101,11 +102,11 @@ export default function GamePage() {
 
   // Load game data
   useEffect(() => {
-    const gameRef = ref(database, `games/${id}`);
+    const gameRef = ref(database, `${BASE_PATH}${GAMES}/${id}`);
 
     const unsubscribe = onValue(gameRef, (snapshot) => {
       const data = snapshot.val() as GameData | null;
-
+      console.log("data", data);
       if (data) {
         setGameData(data);
       } else {
@@ -124,9 +125,7 @@ export default function GamePage() {
 
   // Load all players
   useEffect(() => {
-    const playersRef = ref(database, "players");
-
-    const unsubscribe = onValue(playersRef, (snapshot) => {
+    const unsubscribe = onValue(playersRef(), (snapshot) => {
       const data = snapshot.val();
       const playersList: Player[] = [];
 
@@ -162,7 +161,7 @@ export default function GamePage() {
       (!gameData.playerOneBoard ||
         Object.keys(gameData.playerOneBoard).length === 0)
     ) {
-      const gameRef = ref(database, `games/${id}`);
+      const gameRef = ref(database, `${BASE_PATH}${GAMES}/${id}`);
 
       // Create initial board state with all players
       const initialBoard: Record<string, { crossed: boolean }> = {};
@@ -190,7 +189,7 @@ export default function GamePage() {
     localStorage.setItem(`game_${id}_role`, role);
 
     // Update the game with the selected role
-    const gameRef = ref(database, `games/${id}`);
+    const gameRef = ref(database, `${BASE_PATH}${GAMES}/${id}`);
     const updates: any = { [`${role}Joined`]: true };
 
     // Only check for phase transition if we're in setup phase
@@ -233,7 +232,7 @@ export default function GamePage() {
   const selectTarget = () => {
     if (!gameData || !selectedRole || !selectedTarget) return;
 
-    const gameRef = ref(database, `games/${id}`);
+    const gameRef = ref(database, `${BASE_PATH}${GAMES}/${id}`);
     // Set the target for the current player
     const targetKey = `${selectedRole}TargetId`;
 
@@ -265,7 +264,7 @@ export default function GamePage() {
     if (availablePlayers.length >= 2) {
       const shuffled = [...availablePlayers].sort(() => 0.5 - Math.random());
 
-      const gameRef = ref(database, `games/${id}`);
+      const gameRef = ref(database, `${BASE_PATH}${GAMES}/${id}`);
       update(gameRef, {
         playerOneTargetId: shuffled[0].id,
         playerTwoTargetId: shuffled[1].id,
@@ -373,7 +372,7 @@ export default function GamePage() {
       [playerId]: { crossed: !currentBoard[playerId]?.crossed },
     };
 
-    const gameRef = ref(database, `games/${id}`);
+    const gameRef = ref(database, `${BASE_PATH}${GAMES}/${id}`);
     update(gameRef, {
       [boardKey]: newBoard,
     });
@@ -454,7 +453,7 @@ export default function GamePage() {
   const makeGuess = (player: Player) => {
     if (!gameData || !selectedRole) return;
 
-    const gameRef = ref(database, `games/${id}`);
+    const gameRef = ref(database, `${BASE_PATH}${GAMES}/${id}`);
 
     // Get the opponent's target (the one the current player can't see)
     const opponentRole =
@@ -512,7 +511,7 @@ export default function GamePage() {
   const nextTurn = async () => {
     if (!gameData || !selectedRole) return;
 
-    const gameRef = ref(database, `games/${id}`);
+    const gameRef = ref(database, `${BASE_PATH}${GAMES}/${id}`);
     const otherRole = selectedRole === "playerOne" ? "playerTwo" : "playerOne";
 
     // Regular turn update
@@ -536,7 +535,7 @@ export default function GamePage() {
   };
 
   const resetGame = async () => {
-    const gameRef = ref(database, `games/${id}`);
+    const gameRef = ref(database, `${BASE_PATH}${GAMES}/${id}`);
 
     try {
       // Reset all players to uncrossed
