@@ -28,6 +28,8 @@ import {
   Trophy,
   AlertTriangle,
   ZoomIn,
+  Minus,
+  Plus,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -87,6 +89,7 @@ export default function GamePage() {
   const [currentGuess, setCurrentGuess] = useState<Player | null>(null);
   const [crossedThisTurn, setCrossedThisTurn] = useState<string[]>([]);
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
+  const [gridSize, setGridSize] = useState(6);
 
   // Load saved role from localStorage on component mount
   useEffect(() => {
@@ -1078,7 +1081,7 @@ export default function GamePage() {
 
   // Playing Phase
   return (
-    <div className="container mx-auto p-4 md:p-8">
+    <div className="container mx-auto p-4 md:p-8 pb-24">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Guess who?</h1>
         <div className="flex space-x-2">
@@ -1120,12 +1123,25 @@ export default function GamePage() {
       )}
 
       {/* Game Status */}
-      <div className="flex flex-row justify-between mb-2 items-bewteen">
-        <p className="text-muted-foreground">
-          {gameData.currentTurn === selectedRole
-            ? "🟢 Your turn"
-            : "⏳ Waiting for opponent"}
-        </p>
+      <div className="flex flex-row justify-between mb-2 items-center">
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setGridSize((prev) => Math.min(8, prev + 1))}
+            disabled={gridSize >= 8}
+          >
+            <Minus className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="outline"
+            size="icon"
+            onClick={() => setGridSize((prev) => Math.max(2, prev - 1))}
+            disabled={gridSize <= 2}
+          >
+            <Plus className="h-4 w-4" />
+          </Button>
+        </div>
 
         <p className="text-sm text-muted-foreground">
           {getCrossedCount()} : {remainingPlayers.length}
@@ -1180,52 +1196,33 @@ export default function GamePage() {
         </div>
       )}
 
-      <div className="mb-6 flex justify-between items-between">
-        <Button
-          onClick={() => setIsGuessMode(!isGuessMode)}
-          variant={isGuessMode ? "destructive" : "outline"}
-          disabled={
-            gameData.currentTurn !== selectedRole || crossedThisTurn.length > 0
-          }
-        >
-          {isGuessMode ? "Cancel Guess" : "Guess Mode"}
-        </Button>
-        <Button
-          onClick={nextTurn}
-          disabled={gameData.currentTurn !== selectedRole}
-        >
-          End Turn
-        </Button>
-      </div>
-
-      {/* Opponent's Target */}
-
       {/* Game Board - All Players */}
-      <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-1 sm:gap-2 md:gap-3">
+      <div
+        className="grid gap-2"
+        style={{ gridTemplateColumns: `repeat(${gridSize}, 1fr)` }}
+      >
         {shuffledPlayers.map((player) => {
           const isAnimating = animatingPlayer === player.id;
-          const isCrossed = myBoard[player.id]?.crossed || false;
-          const isGamePlayer =
-            player.id === gameData.playerOneId ||
-            player.id === gameData.playerTwoId;
-
-          // Don't show game players in the elimination grid
-          if (isGamePlayer) return null;
+          const isCrossed = myBoard[player.id]?.crossed;
+          const isClickable =
+            gameData.currentTurn === selectedRole && !isCrossed && !isGuessMode;
 
           return (
             <Card
               key={player.id}
-              className={`cursor-pointer transition-all duration-300 transform ${
-                isAnimating ? "scale-110 rotate-3" : ""
-              } ${
-                isCrossed
-                  ? "bg-red-100 dark:bg-red-900/20 border-red-300 dark:border-red-700"
-                  : "hover:bg-accent/50 hover:scale-105"
-              }`}
-              onClick={() => togglePlayerCrossed(player.id)}
+              className={`relative overflow-hidden transition-all duration-200 ${
+                isClickable
+                  ? "cursor-pointer hover:scale-105 hover:shadow-lg"
+                  : ""
+              } ${isCrossed ? "opacity-50" : ""}`}
+              onClick={() => {
+                if (isClickable) {
+                  togglePlayerCrossed(player.id);
+                }
+              }}
             >
-              <CardContent className="p-1 flex flex-col items-center justify-center text-center relative">
-                <div className="w-full aspect-[3/4] rounded-lg overflow-hidden relative group">
+              <CardContent className="p-1">
+                <div className="relative aspect-[3/4] rounded-lg overflow-hidden group">
                   {/* Zoom icon in top-left corner */}
                   <div
                     className="absolute top-2 left-2 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-200"
@@ -1252,18 +1249,13 @@ export default function GamePage() {
                       </span>
                     </div>
                   )}
+
                   <div className="absolute bottom-0 left-0 right-0 bg-black/70 p-1">
-                    <p
-                      className={`text-xs font-medium text-white transition-all duration-300 truncate w-full ${
-                        isCrossed ? "line-through opacity-50" : ""
-                      }`}
-                      title={player.nickname || player.name}
-                    >
-                      {player.nickname || player.name.split(" ")[0]}
+                    <p className="text-xs font-medium text-white truncate">
+                      {player.nickname || player.name}
                     </p>
                   </div>
 
-                  {/* Cross overlay */}
                   {isCrossed && (
                     <div className="absolute inset-0 flex items-center justify-center bg-black/50">
                       <X
@@ -1282,6 +1274,29 @@ export default function GamePage() {
             </Card>
           );
         })}
+      </div>
+
+      {/* Fixed Game Controls */}
+      <div className="fixed bottom-0 left-0 right-0 bg-background/80 backdrop-blur-sm border-t p-4">
+        <div className="container mx-auto">
+          {gameData.currentTurn === selectedRole ? (
+            <div className="flex justify-between items-center">
+              <Button
+                onClick={() => setIsGuessMode(!isGuessMode)}
+                variant={isGuessMode ? "destructive" : "outline"}
+                disabled={crossedThisTurn.length > 0}
+              >
+                {isGuessMode ? "Cancel Guess" : "Guess Mode"}
+              </Button>
+              <Button onClick={nextTurn}>End Turn</Button>
+            </div>
+          ) : (
+            <div className="text-center text-muted-foreground">
+              ⏳ Waiting for {opponent?.nickname || opponent?.name} to finish
+              their turn...
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Fullscreen Player Modal */}
