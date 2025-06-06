@@ -43,7 +43,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 
 interface Player {
   id: string;
@@ -377,7 +378,7 @@ export default function GamePage() {
     if (!winnerPlayer || !loserPlayer) return;
 
     // Update winner stats
-    const winnerStatsRef = ref(database, `playerStats/${winnerId}`);
+    const winnerStatsRef = ref(database, `${BASE_PATH}playerStats/${winnerId}`);
     const winnerSnapshot = await get(winnerStatsRef);
     const currentWinnerStats = winnerSnapshot.val() || {
       name: winnerPlayer.name,
@@ -402,7 +403,7 @@ export default function GamePage() {
     await update(winnerStatsRef, newWinnerStats);
 
     // Update loser stats
-    const loserStatsRef = ref(database, `playerStats/${loserId}`);
+    const loserStatsRef = ref(database, `${BASE_PATH}playerStats/${loserId}`);
     const loserSnapshot = await get(loserStatsRef);
     const currentLoserStats = loserSnapshot.val() || {
       name: loserPlayer.name,
@@ -1277,8 +1278,18 @@ export default function GamePage() {
         onOpenChange={() => setSelectedPlayer(null)}
       >
         <DialogContent className="max-w-4xl p-0 overflow-hidden">
+          <VisuallyHidden>
+            <DialogTitle>
+              {selectedPlayer
+                ? `${selectedPlayer.nickname || selectedPlayer.name}'s Profile`
+                : "Player Profile"}
+            </DialogTitle>
+          </VisuallyHidden>
           {selectedPlayer && (
-            <div className="relative w-full max-h-[90vh] flex items-center justify-center">
+            <div
+              className="relative w-full max-h-[90vh] flex items-center justify-center cursor-pointer"
+              onClick={() => setSelectedPlayer(null)}
+            >
               {selectedPlayer.imageUrl ? (
                 <img
                   src={selectedPlayer.imageUrl}

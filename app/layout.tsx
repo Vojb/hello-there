@@ -9,8 +9,8 @@ import Script from "next/script";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Guess Who",
-  description: "Manage your squad and play games",
+  title: "FC Möllan! Who's there?",
+  description: "Guess who's there",
   generator: "v0.dev",
   manifest: "/manifest.json",
   themeColor: "#000000",
@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Squad Game App",
+    title: "Who's there?",
   },
 };
 
@@ -28,7 +28,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -37,9 +37,10 @@ export default function RootLayout({
       <body className={inter.className}>
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
-          enableSystem
+          defaultTheme="dark"
+          enableSystem={false}
           disableTransitionOnChange
+          forcedTheme="dark"
         >
           {children}
           <Toaster />
