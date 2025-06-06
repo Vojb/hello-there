@@ -6,13 +6,14 @@ interface BackgroundGridProps {
 }
 
 export function BackgroundGrid({ players, className }: BackgroundGridProps) {
+  const sort = Math.random();
   return (
     <div className="fixed inset-0 w-full h-full">
       <div
         className={`absolute inset-0 grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-1 opacity-50 -z-10 ${className}`}
       >
         {players
-          .map((player) => ({ ...player, sort: Math.random() }))
+          .map((player) => ({ ...player, sort: sort }))
           .filter(
             (player) =>
               player.imageUrl !=
