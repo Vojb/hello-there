@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { database } from "@/lib/firebase";
 import { ref, push, onValue, remove } from "firebase/database";
-import { playersRef, gamesRef, GAMES } from "@/lib/firebase-refs";
+import { playersRef, gamesRef, GAMES, BASE_PATH } from "@/lib/firebase-refs";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -190,7 +190,7 @@ export default function GamesPage() {
 
   const deleteGame = async (gameId: string) => {
     try {
-      const gameRef = ref(database, `${GAMES}/${gameId}`);
+      const gameRef = ref(database, `${BASE_PATH}${GAMES}/${gameId}`);
       await remove(gameRef);
       setGameToDelete(null);
     } catch (error) {
