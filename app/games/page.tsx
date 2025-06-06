@@ -200,9 +200,9 @@ export default function GamesPage() {
 
   return (
     <div className="container mx-auto p-2 sm:p-4 md:p-8">
-      <BackgroundGrid players={players} />
+      <BackgroundGrid sort={0.4} players={players} />
 
-      <div className="flex justify-between items-center mb-4 sm:mb-6">
+      <div className="flex justify-between items-center mb-4 sm:mb-6 zIndex-10">
         <h1 className="text-2xl sm:text-3xl font-bold">Games</h1>
         <Link href="/league">
           <Button variant="outline" className="gap-2">
