@@ -4,14 +4,9 @@ import { useMemo } from "react";
 interface BackgroundGridProps {
   players: Player[];
   className?: string;
-  sort: number;
 }
 
-export function BackgroundGrid({
-  players,
-  className,
-  sort,
-}: BackgroundGridProps) {
+export function BackgroundGrid({ players, className }: BackgroundGridProps) {
   const randomizedPlayers = useMemo(() => {
     return players
       .map((player) => ({ ...player, sort: Math.random() }))

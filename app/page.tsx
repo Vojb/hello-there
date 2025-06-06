@@ -106,7 +106,7 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-background relative overflow-hidden">
       {/* Background Grid */}
-      <BackgroundGrid sort={Math.random()} players={players} />
+      <BackgroundGrid players={players} />
 
       {/* Content */}
       <div className="container mx-auto p-4 md:p-8 relative z-10">
