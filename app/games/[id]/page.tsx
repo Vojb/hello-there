@@ -818,7 +818,7 @@ export default function GamePage() {
                   <p className="text-sm text-muted-foreground">Player One</p>
                   <div className="mt-4 w-full">
                     <Button className="w-full" variant="outline">
-                      Selectx
+                      Select
                     </Button>
                   </div>
                 </div>
@@ -854,7 +854,7 @@ export default function GamePage() {
                   <p className="text-sm text-muted-foreground">Player Two</p>
                   <div className="mt-4 w-full">
                     <Button className="w-full" variant="outline">
-                      Select Role
+                      Select
                     </Button>
                   </div>
                 </div>
