@@ -1126,7 +1126,11 @@ export default function GamePage() {
                   }}
                 >
                   <div className="bg-black/50 hover:bg-black/70 rounded-full p-1.5 cursor-zoom-in transition-colors duration-200">
-                    <ZoomIn className="h-4 w-4 text-white" />
+                    <ZoomIn
+                      className={`${
+                        gridSize > 4 ? "h-2 w-2" : "h-4 w-4"
+                      } text-white`}
+                    />
                   </div>
                 </div>
 
@@ -1196,7 +1200,11 @@ export default function GamePage() {
                     }}
                   >
                     <div className="bg-black/50 hover:bg-black/70 rounded-full p-1.5 cursor-zoom-in transition-colors duration-200">
-                      <ZoomIn className="h-4 w-4 text-white" />
+                      <ZoomIn
+                        className={`${
+                          gridSize > 5 ? "h-2 w-2" : "h-4 w-4"
+                        } text-white`}
+                      />
                     </div>
                   </div>
 
