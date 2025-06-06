@@ -199,79 +199,44 @@ export default function GamesPage() {
   };
 
   return (
-    <div className="container mx-auto p-2 sm:p-4 md:p-8">
+    <div className="container mx-auto p-2 sm:p-4 md:p-8 relative">
       <BackgroundGrid players={players} />
-
-      <div className="flex justify-between items-center mb-4 sm:mb-6 zIndex-10">
-        <h1 className="text-2xl sm:text-3xl font-bold">Games</h1>
-        <Link href="/league">
-          <Button variant="outline" className="gap-2">
-            <Trophy className="w-4 h-4" />
-            League Table
+      <div className="relative z-10">
+        <div className="flex justify-between items-center mb-4 sm:mb-6">
+          <h1 className="text-2xl sm:text-3xl font-bold">Games</h1>
+          <Button variant="outline" className="gap-2" asChild>
+            <Link href="/league">
+              <Trophy className="w-4 h-4" />
+              League Table
+            </Link>
           </Button>
-        </Link>
-      </div>
+        </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
-        <Card className=" duration-300 border-border bg-background/80 backdrop-blur-sm relative overflow-hidden">
-          <CardHeader className="p-4 sm:p-6">
-            <CardTitle
-              onClick={() => {
-                router.push("/squad");
-              }}
-              className="text-xl sm:text-2xl"
-            >
-              Create New Game
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="p-4 sm:p-6">
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="playerOne">Player One</Label>
-                <Select
-                  value={selectedPlayerOne}
-                  onValueChange={setSelectedPlayerOne}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select Player One" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {players.map((player) => (
-                      <SelectItem key={player.id} value={player.id}>
-                        <div className="flex items-center space-x-2">
-                          <Avatar className="h-6 w-6">
-                            {player.imageUrl ? (
-                              <AvatarImage
-                                src={player.imageUrl || "/placeholder.svg"}
-                                alt={player.name}
-                              />
-                            ) : (
-                              <AvatarFallback className="text-xs">
-                                {player.name.substring(0, 2).toUpperCase()}
-                              </AvatarFallback>
-                            )}
-                          </Avatar>
-                          <span className="truncate">{player.name}</span>
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="playerTwo">Player Two</Label>
-                <Select
-                  value={selectedPlayerTwo}
-                  onValueChange={setSelectedPlayerTwo}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select Player Two" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {players
-                      .filter((player) => player.id !== selectedPlayerOne)
-                      .map((player) => (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 mb-6 sm:mb-8">
+          <Card className=" duration-300 border-border bg-background/80 backdrop-blur-sm relative overflow-hidden">
+            <CardHeader className="p-4 sm:p-6">
+              <CardTitle
+                onClick={() => {
+                  router.push("/squad");
+                }}
+                className="text-xl sm:text-2xl"
+              >
+                Create New Game
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="p-4 sm:p-6">
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="playerOne">Player One</Label>
+                  <Select
+                    value={selectedPlayerOne}
+                    onValueChange={setSelectedPlayerOne}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select Player One" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {players.map((player) => (
                         <SelectItem key={player.id} value={player.id}>
                           <div className="flex items-center space-x-2">
                             <Avatar className="h-6 w-6">
@@ -290,181 +255,217 @@ export default function GamesPage() {
                           </div>
                         </SelectItem>
                       ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Target Selection Mode */}
-              <div className="space-y-2">
-                <Label>Target Selection Mode</Label>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  <Button
-                    variant={targetMode === "select" ? "default" : "outline"}
-                    onClick={() => setTargetMode("select")}
-                    className="h-12 w-full"
-                  >
-                    <Target className="mr-2 h-4 w-4" />
-                    Choose Targets
-                  </Button>
-                  <Button
-                    variant={targetMode === "random" ? "default" : "outline"}
-                    onClick={() => setTargetMode("random")}
-                    className="h-12 w-full"
-                  >
-                    <Shuffle className="mr-2 h-4 w-4" />
-                    Random Targets
-                  </Button>
+                    </SelectContent>
+                  </Select>
                 </div>
-              </div>
 
-              <Button
-                onClick={createNewGame}
-                disabled={
-                  !selectedPlayerOne ||
-                  !selectedPlayerTwo ||
-                  selectedPlayerOne === selectedPlayerTwo
-                }
-                className="w-full h-12"
-              >
-                Create Game
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+                <div className="space-y-2">
+                  <Label htmlFor="playerTwo">Player Two</Label>
+                  <Select
+                    value={selectedPlayerTwo}
+                    onValueChange={setSelectedPlayerTwo}
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select Player Two" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {players
+                        .filter((player) => player.id !== selectedPlayerOne)
+                        .map((player) => (
+                          <SelectItem key={player.id} value={player.id}>
+                            <div className="flex items-center space-x-2">
+                              <Avatar className="h-6 w-6">
+                                {player.imageUrl ? (
+                                  <AvatarImage
+                                    src={player.imageUrl || "/placeholder.svg"}
+                                    alt={player.name}
+                                  />
+                                ) : (
+                                  <AvatarFallback className="text-xs">
+                                    {player.name.substring(0, 2).toUpperCase()}
+                                  </AvatarFallback>
+                                )}
+                              </Avatar>
+                              <span className="truncate">{player.name}</span>
+                            </div>
+                          </SelectItem>
+                        ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Target Selection Mode */}
+                <div className="space-y-2">
+                  <Label>Target Selection Mode</Label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    <Button
+                      variant={targetMode === "select" ? "default" : "outline"}
+                      onClick={() => setTargetMode("select")}
+                      className="h-12 w-full"
+                    >
+                      <Target className="mr-2 h-4 w-4" />
+                      Choose Targets
+                    </Button>
+                    <Button
+                      variant={targetMode === "random" ? "default" : "outline"}
+                      onClick={() => setTargetMode("random")}
+                      className="h-12 w-full"
+                    >
+                      <Shuffle className="mr-2 h-4 w-4" />
+                      Random Targets
+                    </Button>
+                  </div>
+                </div>
+
+                <Button
+                  onClick={createNewGame}
+                  disabled={
+                    !selectedPlayerOne ||
+                    !selectedPlayerTwo ||
+                    selectedPlayerOne === selectedPlayerTwo
+                  }
+                  className="w-full h-12"
+                >
+                  Create Game
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          <Card className=" duration-300 border-border bg-background/80 backdrop-blur-sm relative overflow-hidden">
+            <CardHeader className="p-4 sm:p-6">
+              <CardTitle className="text-xl sm:text-2xl">Join Game</CardTitle>
+            </CardHeader>
+            <CardContent className="p-4 sm:p-6">
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="gameId">Game ID</Label>
+                  <Input
+                    id="gameId"
+                    placeholder="Enter Game ID"
+                    value={gameId}
+                    onChange={(e) => setGameId(e.target.value)}
+                    className="w-full"
+                  />
+                </div>
+                <Button
+                  onClick={joinGame}
+                  disabled={!gameId.trim()}
+                  className="w-full h-12"
+                >
+                  Join Game
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
 
         <Card className=" duration-300 border-border bg-background/80 backdrop-blur-sm relative overflow-hidden">
-          <CardHeader className="p-4 sm:p-6">
-            <CardTitle className="text-xl sm:text-2xl">Join Game</CardTitle>
-          </CardHeader>
-          <CardContent className="p-4 sm:p-6">
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="gameId">Game ID</Label>
-                <Input
-                  id="gameId"
-                  placeholder="Enter Game ID"
-                  value={gameId}
-                  onChange={(e) => setGameId(e.target.value)}
-                  className="w-full"
-                />
+          <div className="space-y-4 space-x-4">
+            <h2 className="text-xl sm:text-2xl font-semibold">Recent Games</h2>
+            {isLoading ? (
+              <div className="text-center py-8">Loading games...</div>
+            ) : games.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                No games found
               </div>
-              <Button
-                onClick={joinGame}
-                disabled={!gameId.trim()}
-                className="w-full h-12"
-              >
-                Join Game
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <Card className=" duration-300 border-border bg-background/80 backdrop-blur-sm relative overflow-hidden">
-        <div className="space-y-4 space-x-4">
-          <h2 className="text-xl sm:text-2xl font-semibold">Recent Games</h2>
-          {isLoading ? (
-            <div className="text-center py-8">Loading games...</div>
-          ) : games.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              No games found
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {games
-                .filter((game) => game.gamePhase !== "finished")
-                .map((game) => (
-                  <Card
-                    key={game.id}
-                    className="hover:bg-accent/50 transition-colors"
-                  >
-                    <CardContent className="p-4">
-                      <div className="space-y-2">
-                        <div className="flex items-center justify-between">
-                          <span className="text-sm text-muted-foreground">
-                            Game ID: {game.id.substring(0, 8)}...
-                          </span>
-                          <div className="flex items-center gap-2">
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {games
+                  .filter((game) => game.gamePhase !== "finished")
+                  .map((game) => (
+                    <Card
+                      key={game.id}
+                      className="hover:bg-accent/50 transition-colors"
+                    >
+                      <CardContent className="p-4">
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
                             <span className="text-sm text-muted-foreground">
-                              {getGamePhaseText(game.gamePhase)}
+                              Game ID: {game.id.substring(0, 8)}...
                             </span>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setGameToDelete(game.id);
-                              }}
-                            >
-                              <Trash2 className="h-4 w-4 text-destructive" />
-                            </Button>
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm text-muted-foreground">
+                                {getGamePhaseText(game.gamePhase)}
+                              </span>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setGameToDelete(game.id);
+                                }}
+                              >
+                                <Trash2 className="h-4 w-4 text-destructive" />
+                              </Button>
+                            </div>
+                          </div>
+                          <div
+                            className="flex items-center space-x-2 cursor-pointer"
+                            onClick={() => router.push(`/games/${game.id}`)}
+                          >
+                            <Avatar className="h-8 w-8">
+                              <AvatarFallback className="text-xs">
+                                {getPlayerName(game.playerOneId)
+                                  .substring(0, 2)
+                                  .toUpperCase()}
+                              </AvatarFallback>
+                            </Avatar>
+                            <span className="truncate">
+                              {getPlayerName(game.playerOneId)}
+                            </span>
+                          </div>
+                          <div
+                            className="flex items-center space-x-2 cursor-pointer"
+                            onClick={() => router.push(`/games/${game.id}`)}
+                          >
+                            <Avatar className="h-8 w-8">
+                              <AvatarFallback className="text-xs">
+                                {getPlayerName(game.playerTwoId)
+                                  .substring(0, 2)
+                                  .toUpperCase()}
+                              </AvatarFallback>
+                            </Avatar>
+                            <span className="truncate">
+                              {getPlayerName(game.playerTwoId)}
+                            </span>
                           </div>
                         </div>
-                        <div
-                          className="flex items-center space-x-2 cursor-pointer"
-                          onClick={() => router.push(`/games/${game.id}`)}
-                        >
-                          <Avatar className="h-8 w-8">
-                            <AvatarFallback className="text-xs">
-                              {getPlayerName(game.playerOneId)
-                                .substring(0, 2)
-                                .toUpperCase()}
-                            </AvatarFallback>
-                          </Avatar>
-                          <span className="truncate">
-                            {getPlayerName(game.playerOneId)}
-                          </span>
-                        </div>
-                        <div
-                          className="flex items-center space-x-2 cursor-pointer"
-                          onClick={() => router.push(`/games/${game.id}`)}
-                        >
-                          <Avatar className="h-8 w-8">
-                            <AvatarFallback className="text-xs">
-                              {getPlayerName(game.playerTwoId)
-                                .substring(0, 2)
-                                .toUpperCase()}
-                            </AvatarFallback>
-                          </Avatar>
-                          <span className="truncate">
-                            {getPlayerName(game.playerTwoId)}
-                          </span>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-            </div>
-          )}
-        </div>
-      </Card>
+                      </CardContent>
+                    </Card>
+                  ))}
+              </div>
+            )}
+          </div>
+        </Card>
 
-      <AlertDialog
-        open={!!gameToDelete}
-        onOpenChange={() => setGameToDelete(null)}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the
-              game and all associated data.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={() => gameToDelete && deleteGame(gameToDelete)}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Delete
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        <AlertDialog
+          open={!!gameToDelete}
+          onOpenChange={() => setGameToDelete(null)}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This action cannot be undone. This will permanently delete the
+                game and all associated data.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={() => gameToDelete && deleteGame(gameToDelete)}
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              >
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </div>
     </div>
   );
 }
