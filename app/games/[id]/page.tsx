@@ -106,7 +106,6 @@ export default function GamePage() {
 
     const unsubscribe = onValue(gameRef, (snapshot) => {
       const data = snapshot.val() as GameData | null;
-      console.log("data", data);
       if (data) {
         setGameData(data);
       } else {
@@ -286,34 +285,11 @@ export default function GamePage() {
       return;
     }
 
-    // Don't allow crossing off the actual players
-    if (
-      playerId === gameData.playerOneId ||
-      playerId === gameData.playerTwoId
-    ) {
-      toast({
-        title: "Cannot eliminate players",
-        description: "You cannot eliminate the actual game players.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     const myBoard = getMyBoard();
     const remainingPlayers = getRemainingPlayers();
 
     // If in guess mode, show guess dialog
     if (isGuessMode) {
-      if (crossedThisTurn.length > 0) {
-        toast({
-          title: "Cannot cross and guess",
-          description:
-            "You cannot cross a player and make a guess in the same turn. End your turn first.",
-          variant: "destructive",
-        });
-        return;
-      }
-
       const playerToGuess = players.find((p) => p.id === playerId);
       if (playerToGuess) {
         setCurrentGuess(playerToGuess);
@@ -350,7 +326,7 @@ export default function GamePage() {
       // Crossing a player
       setCrossedThisTurn((prev) => [...prev, playerId]);
     } else {
-      // Uncrossing a player
+      // Uncrossing a player - remove from crossedThisTurn if it was crossed this turn
       setCrossedThisTurn((prev) => prev.filter((id) => id !== playerId));
     }
   };
@@ -581,23 +557,12 @@ export default function GamePage() {
 
   const getRemainingPlayers = () => {
     const myBoard = getMyBoard();
-    return players.filter(
-      (player) =>
-        !myBoard[player.id]?.crossed &&
-        player.id !== gameData?.playerOneId &&
-        player.id !== gameData?.playerTwoId
-    );
+    return players.filter((player) => !myBoard[player.id]?.crossed);
   };
 
   const getCrossedCount = () => {
     const myBoard = getMyBoard();
-    const eligiblePlayers = players.filter(
-      (player) =>
-        player.id !== gameData?.playerOneId &&
-        player.id !== gameData?.playerTwoId
-    );
-    return eligiblePlayers.filter((player) => myBoard[player.id]?.crossed)
-      .length;
+    return players.filter((player) => myBoard[player.id]?.crossed).length;
   };
 
   const getOpponent = () => {
@@ -1204,18 +1169,18 @@ export default function GamePage() {
           const isAnimating = animatingPlayer === player.id;
           const isCrossed = myBoard[player.id]?.crossed;
           const isClickable =
-            gameData.currentTurn === selectedRole && !isCrossed && !isGuessMode;
+            gameData.currentTurn === selectedRole && !isGuessMode;
 
           return (
             <Card
               key={player.id}
               className={`relative overflow-hidden transition-all duration-200 ${
-                isClickable
+                gameData.currentTurn === selectedRole
                   ? "cursor-pointer hover:scale-105 hover:shadow-lg"
                   : ""
               } ${isCrossed ? "opacity-50" : ""}`}
               onClick={() => {
-                if (isClickable) {
+                if (gameData.currentTurn === selectedRole) {
                   togglePlayerCrossed(player.id);
                 }
               }}
@@ -1256,9 +1221,9 @@ export default function GamePage() {
                   </div>
 
                   {isCrossed && (
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                    <div className="absolute inset-0 flex items-center justify-center bg-red-500/30 backdrop-blur-sm">
                       <X
-                        className="h-6 w-6 sm:h-8 sm:w-8 animate-pulse text-red-500"
+                        className="h-6 w-6 sm:h-8 sm:w-8 animate-pulse text-white"
                         strokeWidth={3}
                       />
                     </div>
